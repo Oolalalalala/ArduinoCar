@@ -67,6 +67,8 @@ bool OnNode()
 
 bool OnRoute()
 {
+  if (OnNode())
+    return false;
   return r1 | r2 | r3 | r4 | r5;
 }
 

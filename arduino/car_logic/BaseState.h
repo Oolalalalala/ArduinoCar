@@ -25,6 +25,7 @@ class CarStateMachine
 public:
   CarStateMachine(CarState* beginState)
   {
+    m_OldState = nullptr;
     m_State = beginState;
     m_State->m_StateMachine = this;
     m_State->OnStateEnter();
@@ -38,20 +39,28 @@ public:
 
   void SwitchState(CarState* newState)
   {
-    m_State->OnStateExit();
-    delete m_State;
+    m_OldState = m_State;
     m_State = newState;
-    m_State->OnStateEnter();
     m_State->m_StateMachine = this;
   }
   
   void OnUpdate(float dt)
   {
     m_State->OnStateUpdate(dt);
+
+    // Check if need to switch state
+    if (m_OldState)
+    {
+      m_OldState->OnStateExit();
+      delete m_OldState;
+      m_OldState = nullptr;
+      m_State->OnStateEnter();
+    }
   }
 
 private:
   CarState* m_State;
+  CarState* m_OldState;
 };
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef BACIS_CONTROL_H
 #define BASIC_CONTROL_H
 
+#include "Arduino.h"
+
 #define PWMA 11
 #define PWMB 12
 #define AIN1 2

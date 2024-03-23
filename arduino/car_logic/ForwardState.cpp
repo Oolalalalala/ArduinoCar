@@ -38,14 +38,19 @@
       // TODO: Make decision here (from the map)
       // Probably transition to other state here
       // if map says go left
-      m_StateMachine->SwitchState(new TurnLeft1State());
-      // if map says go right
-      m_StateMachine->SwitchState(new TurnRight1State());
-      // if map says go backward
-      m_StateMachine->SwitchState(new TurnLeft2State());
+
+
+      //if (OnRoute()) // There is still route in front
+        //m_StateMachine->SwitchState(new ForwardState());
+      if (true)
+        m_StateMachine->SwitchState(new TurnLeft1State());
+      else if (true)// if map says go right
+        m_StateMachine->SwitchState(new TurnRight1State());
+      else if (true)// if map says go backward
+        m_StateMachine->SwitchState(new TurnLeft2State());
 
     }
-
+    Serial.println("Forward state");
   }
   
   void ForwardState::OnStateExit()

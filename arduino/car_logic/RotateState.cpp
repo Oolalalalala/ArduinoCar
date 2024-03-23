@@ -16,6 +16,9 @@ void TurnLeft1State::OnStateUpdate(float dt)
 
     if (leftRoute && OnRoute())
       m_StateMachine->SwitchState(new ForwardState());
+
+      
+  Serial.println("Turn left state");
   }
   
 void TurnLeft1State::OnStateExit()
@@ -37,6 +40,9 @@ void TurnRight1State::OnStateUpdate(float dt)
 
   if (leftRoute && OnRoute())
     m_StateMachine->SwitchState(new ForwardState());
+
+    
+  Serial.println("Turn right state");
 }
   
 void TurnRight1State::OnStateExit()
