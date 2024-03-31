@@ -1,4 +1,5 @@
 import csv
+from collections import deque
 
 class Map():
     def __init__(self, raw_map, x_width, y_width):
@@ -14,6 +15,55 @@ class Map():
         #Calculate score for each node
         for node in self.nodes:   
             node.calculate_score()
+    
+    #Find the shortest path from A to B
+    def path_find(self, A_index, B_index):
+        #BFS while keeping track of all the subpaths
+        searched = set()
+        subpaths = deque()
+        search_queue = deque([(A_index, 0)])
+        
+        while search_queue[0][0] != B_index:
+            searching, distance = search_queue.popleft()
+            for neighbor in self.nodes[searching - 1].neighbors:
+                if neighbor is not None and neighbor.index not in searched:
+                    subpaths.append((searching, neighbor.index, distance))
+                    search_queue.append((neighbor.index, distance + 1)) if (neighbor.index, distance + 1) not in search_queue else None
+            searched.add(searching)
+        total_distance = distance
+        
+        #Trace back all the shortest path
+        paths = deque([deque([B_index])])
+        while subpaths:
+            this_subpath = subpaths.pop()
+            path_distance = this_subpath[2]
+            while len(paths[0]) + path_distance < total_distance:
+                paths.popleft()
+            for i in range(len(paths)):
+                if this_subpath[1] == paths[i][0]:
+                    paths.append(paths[i].copy())
+                    paths[-1].appendleft(this_subpath[0])
+        while paths[0][0] != A_index:
+            paths.popleft()
+                            
+        return paths
+    
+    def path_to_operation(self, path, direction = None):
+        direction = self.nodes[path[0] - 1].get_direction(self.nodes[path[1] - 1]) if direction is None else direction
+        operations = ''
+        
+        for i in range(len(path) - 1):
+            next_direction = self.nodes[path[i] - 1].get_direction(self.nodes[path[i + 1] - 1])
+            if direction == next_direction:
+                operations += 'f'
+            elif (direction, next_direction) in [(0, 1), (1, 0), (2, 3), (3, 2)]:
+                operations += 'b'
+            elif (direction, next_direction) in [(0, 2), (2, 1), (1, 3), (3, 0)]:
+                operations += 'l'
+            elif (direction, next_direction) in [(0, 3), (3, 1), (1, 2), (2, 0)]:
+                operations += 'r'
+            direction = next_direction
+        return operations
     
     #Print all nodes  
     def print(self):
@@ -32,6 +82,11 @@ class Node():
     def add_neighbor(self, neighbor, direction):
         self.neighbors[direction] = neighbor
     
+    def get_direction(self, neighbor):
+        for i in range(4):
+            if self.neighbors[i] == neighbor:
+                return i
+            
     #If the node is a dead end (has only one neighbor), then the score is x + y
     def calculate_score(self):
         neighbor_count = 0
@@ -58,9 +113,14 @@ def read_csv(file):
     return data
 
 def main():
-    raw_map = read_csv('python\Route_Algorithm\maze.csv')
+    raw_map = read_csv('python\\Route_Algorithm\\maze.csv')
     maze = Map(raw_map, 8, 6)
-    maze.print()
+    
+    # Enter the start and end point here
+    paths = maze.path_find(1, 48)
+    for path in paths:
+        print(path)
+        print(maze.path_to_operation(path))
 
 if __name__ == "__main__":
     main()
