@@ -92,8 +92,16 @@ float GetDeltaTime()
 }
 float leftWheelSpeed = 100.0, rightWheelSpeed = 100.0;
 
+bool x = false;
 void loop() 
 {
+  if (x)
+  MoveWheel(255, 100);
+  else
+  MoveWheel(255,255);
+  x = !x;
+  delay(1000);
+  return;
   ReadPinValue();
 
   float offset = GetOffsetValue() * adjustConstant;// * GetDeltaTime();

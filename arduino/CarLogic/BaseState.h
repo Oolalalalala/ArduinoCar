@@ -1,6 +1,8 @@
 #ifndef BASE_STATE_H
 #define BASE_STATE_H
 
+#include "CarCommandQueue.h"
+
 // Forward delcaration
 class CarStateMachine;
 
@@ -16,6 +18,7 @@ public:
 
 protected:
   CarStateMachine* m_StateMachine = nullptr;
+  CarCommandQueue* m_CommandQueue = nullptr;
 
   friend class CarStateMachine;
 };
@@ -23,11 +26,14 @@ protected:
 class CarStateMachine
 {
 public:
-  CarStateMachine(CarState* beginState)
+  CarStateMachine(CarState* beginState, CarCommandQueue* commandQueue)
   {
     m_OldState = nullptr;
+    m_CommandQueue = commandQueue;
+
     m_State = beginState;
     m_State->m_StateMachine = this;
+    m_State->m_CommandQueue = commandQueue;
     m_State->OnStateEnter();
   }
 
@@ -42,6 +48,7 @@ public:
     m_OldState = m_State;
     m_State = newState;
     m_State->m_StateMachine = this;
+    m_State->m_CommandQueue = m_CommandQueue;
   }
   
   void OnUpdate(float dt)
@@ -61,6 +68,8 @@ public:
 private:
   CarState* m_State;
   CarState* m_OldState;
+
+  CarCommandQueue* m_CommandQueue;
 };
 
 #endif

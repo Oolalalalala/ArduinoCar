@@ -1,6 +1,7 @@
 #include "BasicControl.h"
 #include "BaseState.h"
 #include "ForwardState.h"
+#include "BluetoothDispatcher.h"
 
 void setup() {
   InitPins();
@@ -8,11 +9,15 @@ void setup() {
 }
 
 
-CarStateMachine stateMachine(new ForwardState());
+CarCommandQueue queue;
+CarStateMachine stateMachine(new ForwardState(), &queue);
+BluetoothDispatcher dispatcher(&queue);
 
 void loop() 
 {
   CollectPinValue();
+
+  dispatcher.ParseAllMessage();
 
   float dt = GetDeltaTime();
   stateMachine.OnUpdate(dt);

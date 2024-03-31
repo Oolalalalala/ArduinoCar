@@ -17,6 +17,7 @@ void CollectPinValue();
 int GetOffsetValue();
 bool OnNode();
 bool OnRoute();
+int GetDetectorCount();
 float GetDeltaTime();
 
 #endif

@@ -72,12 +72,17 @@ bool OnRoute()
   return r1 | r2 | r3 | r4 | r5;
 }
 
+int GetDetectorCount()
+{
+  return r1 + r2 + r3 + r4 + r5;
+}
 
-int oldTime = 0, currentTime = 0;
+
+unsigned long oldTime = 0, currentTime = 0;
 
 float GetDeltaTime()
 {
    oldTime = currentTime;
    currentTime = micros();
-   return 0.000001 * (currentTime - oldTime);
+   return 0.000001f * (currentTime - oldTime);
 }
