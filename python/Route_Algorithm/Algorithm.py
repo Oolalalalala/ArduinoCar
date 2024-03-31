@@ -20,29 +20,43 @@ class Map():
     def path_find(self, A_index, B_index):
         #BFS while keeping track of all the subpaths
         searched = set()
-        subpaths = deque()
+        #Each node in the search_queue is a tuple (index to be searhed, distance from A)
         search_queue = deque([(A_index, 0)])
+        #Each subpath is a tuple (index, next index, first node's distance from A)
+        subpaths = deque()
         
+        #Search until it's B's turn to be searched
         while search_queue[0][0] != B_index:
             searching, distance = search_queue.popleft()
             for neighbor in self.nodes[searching - 1].neighbors:
+                
+                #If the neighbor is not searched yet, record the subpath
                 if neighbor is not None and neighbor.index not in searched:
                     subpaths.append((searching, neighbor.index, distance))
+                    #Add the neighbor to the search_queue if it's not already in the queue
                     search_queue.append((neighbor.index, distance + 1)) if (neighbor.index, distance + 1) not in search_queue else None
+                    
+            #Add the searched node to the searched set after all its neighbors are searched
             searched.add(searching)
         total_distance = distance
         
-        #Trace back all the shortest path
+        #Trace back all the shortest path by using all the subpaths
         paths = deque([deque([B_index])])
         while subpaths:
             this_subpath = subpaths.pop()
             path_distance = this_subpath[2]
+            
+            #Make sure all the paths have the correct length according to path_distance
             while len(paths[0]) + path_distance < total_distance:
                 paths.popleft()
+            
+            #For each subpath, if the subpath fits the last node of the path, create a copy of the path and add the subpath to the path
             for i in range(len(paths)):
                 if this_subpath[1] == paths[i][0]:
                     paths.append(paths[i].copy())
                     paths[-1].appendleft(this_subpath[0])
+        
+        #Remove all the paths that don't start with A
         while paths[0][0] != A_index:
             paths.popleft()
                             
@@ -52,6 +66,7 @@ class Map():
         direction = self.nodes[path[0] - 1].get_direction(self.nodes[path[1] - 1]) if direction is None else direction
         operations = ''
         
+        #[0, 1, 2, 3] = [North, South, West, East]
         for i in range(len(path) - 1):
             next_direction = self.nodes[path[i] - 1].get_direction(self.nodes[path[i + 1] - 1])
             if direction == next_direction:
@@ -82,6 +97,7 @@ class Node():
     def add_neighbor(self, neighbor, direction):
         self.neighbors[direction] = neighbor
     
+    #Return the direction of the neighbor
     def get_direction(self, neighbor):
         for i in range(4):
             if self.neighbors[i] == neighbor:
