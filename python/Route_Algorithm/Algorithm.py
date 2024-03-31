@@ -48,10 +48,11 @@ class Map():
                             
         return paths
     
-    def path_to_operation(self, path):
-        operations = 'f'
-        direction = self.nodes[path[0] - 1].get_direction(self.nodes[path[1] - 1])
-        for i in range(1, len(path) - 1):
+    def path_to_operation(self, path, direction = None):
+        direction = self.nodes[path[0] - 1].get_direction(self.nodes[path[1] - 1]) if direction is None else direction
+        operations = ''
+        
+        for i in range(len(path) - 1):
             next_direction = self.nodes[path[i] - 1].get_direction(self.nodes[path[i + 1] - 1])
             if direction == next_direction:
                 operations += 'f'
