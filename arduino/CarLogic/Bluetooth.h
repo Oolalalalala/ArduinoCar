@@ -1,7 +1,9 @@
 #ifndef BLUETOOTH_H
 #define BLUETOOTH_H
 
-#include <stdint.h>
+#include "Buffer.h"
+#include "CarCommandQueue.h"
+
 
 class Bluetooth
 {
@@ -9,13 +11,10 @@ public:
     static void Initialize();
     static void ShutDown();
 
-    static void SendChar(char value);
-    static void SendString(const char* value);
-    static void SendInt16(int16_t value);
-    static void SendInt32(int32_t value);
+    static void SendMessage(uint8_t type, void* data, uint8_t length);
 
-    static bool ReadAvailable();
-    static char ReadChar();
+    static int AvailableStateMessageCount();
+    static CarCommand ReadStateMessage();
 };
 
 

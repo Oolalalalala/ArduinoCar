@@ -1,23 +1,23 @@
 #include "BasicControl.h"
 #include "BaseState.h"
 #include "ForwardState.h"
-#include "BluetoothDispatcher.h"
+#include "RFID.h"
+#include "StateMachine.h"
+#include "Bluetooth.h"
 
 void setup() {
   InitPins();
   Serial.begin(9600);
+  Bluetooth::Initialize();
+  RFID::Initialize();
 }
 
 
-CarCommandQueue queue;
-CarStateMachine stateMachine(new ForwardState(), &queue);
-BluetoothDispatcher dispatcher(&queue);
+CarStateMachine stateMachine;
 
 void loop() 
 {
   CollectPinValue();
-
-  dispatcher.ParseAllMessage();
 
   float dt = GetDeltaTime();
   stateMachine.OnUpdate(dt);

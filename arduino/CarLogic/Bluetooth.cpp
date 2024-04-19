@@ -1,6 +1,12 @@
 #include "Bluetooth.h"
 #include "Arduino.h"
 
+Buffer s_BluetoothReadBuffer(256);
+Buffer s_AvailableMessage; // Subbuffer of readbuffer
+static Buffer s_WriteMessageBuffer(256);
+uint8_t* s_ReadBufferBeginPtr;
+uint8_t* s_ReadBufferEndPtr;
+
 void Bluetooth::Initialize()
 {
     Serial1.begin(9600);
@@ -12,32 +18,29 @@ void Bluetooth::ShutDown()
     Serial1.end();
 }
 
-void Bluetooth::SendChar(char value)
+
+void Bluetooth::SendMessage(uint8_t type, void* data, uint8_t length)
 {
-    Serial1.write(value);
+    s_WriteMessageBuffer.As<char>()[0] = '<';
+    s_WriteMessageBuffer.As<uint8_t>()[1] = type;
+    s_WriteMessageBuffer.As<uint8_t>()[2] = length;
+    
+    if (data && length)
+        memcpy(s_WriteMessageBuffer.As<char>() + 3, data, length);
+
+    s_WriteMessageBuffer.As<char>()[length + 3] = '>';
+
+    Serial1.write(s_WriteMessageBuffer.As<char>(), length + 4);
 }
 
-void Bluetooth::SendString(const char* value)
-{
-    Serial1.write(value);
-}
-
-void Bluetooth::SendInt16(int16_t value)
-{
-    Serial1.write((char*)&value, 2);
-}
-
-void Bluetooth::SendInt32(int32_t value)
-{
-    Serial1.write((char*)&value, 4);
-}
-
-bool Bluetooth::ReadAvailable()
+int Bluetooth::AvailableStateMessageCount()
 {
     return Serial1.available();
 }
 
-char Bluetooth::ReadChar()
+CarCommand Bluetooth::ReadStateMessage()
 {
-    return Serial1.read();
+    uint8_t value = Serial1.read();
+    
+    return (CarCommand)value;
 }

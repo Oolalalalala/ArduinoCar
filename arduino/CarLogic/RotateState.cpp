@@ -1,6 +1,7 @@
 #include "RotateState.h"
 #include "ForwardState.h"
 #include "BasicControl.h"
+#include "StateMachine.h"
 
 void TurnLeft1State::OnStateEnter()
   {
@@ -15,7 +16,7 @@ void TurnLeft1State::OnStateUpdate(float dt)
       leftRoute = true;
 
     if (leftRoute && OnRoute())
-      m_StateMachine->SwitchState(new ForwardState());
+      m_StateMachine->NextState();
 
       
   Serial.println("Turn left state");
@@ -39,7 +40,7 @@ void TurnRight1State::OnStateUpdate(float dt)
     leftRoute = true;
 
   if (leftRoute && OnRoute())
-    m_StateMachine->SwitchState(new ForwardState());
+      m_StateMachine->NextState();
 
     
   Serial.println("Turn right state");
@@ -68,7 +69,7 @@ void TurnLeft2State::OnStateUpdate(float dt)
     leftRoute = false;
     routeCount++;
     if (routeCount == 2)
-      m_StateMachine->SwitchState(new ForwardState());
+      m_StateMachine->NextState();
   }
 }
   
