@@ -1,5 +1,5 @@
 import bluetooth
-import Route_Algorithm.Algorithm
+import python.Route_Algorithm.map
 
 def main():
     pass
