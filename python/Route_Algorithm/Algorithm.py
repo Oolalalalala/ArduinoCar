@@ -80,6 +80,40 @@ class Map():
             direction = next_direction
         return operations
     
+    def path_to_operation_basic(self, path, direction = None, starting = False):
+        
+        def turn_left(dir):
+            if dir == 0:
+                return 2
+            elif dir == 1:
+                return 3
+            elif dir == 2:
+                return 1
+            elif dir == 3:
+                return 0
+            
+        direction = self.nodes[path[0] - 1].get_direction(self.nodes[path[1] - 1]) if direction is None else direction
+        operations = 'f' if starting else ''
+        
+        #[0, 1, 2, 3] = [North, South, West, East]
+        for i in range(1, len(path) - 1):
+            next_direction = self.nodes[path[i] - 1].get_direction(self.nodes[path[i + 1] - 1])
+            if direction == next_direction:
+                operations += 'f'
+            elif (direction, next_direction) in [(0, 1), (1, 0), (2, 3), (3, 2)]:
+                if self.nodes[path[i] - 1].neighbors[turn_left(direction)] is None:
+                    operations += 'lf'
+                else:
+                    operations += 'llf'
+            elif (direction, next_direction) in [(0, 2), (2, 1), (1, 3), (3, 0)]:
+                operations += 'lf'
+            elif (direction, next_direction) in [(0, 3), (3, 1), (1, 2), (2, 0)]:
+                operations += 'rf'
+            direction = next_direction
+        
+        operations = operations[:-1] + 'i'
+        return (operations, direction)
+    
     #Print all nodes  
     def print(self):
         for node in self.nodes:   
@@ -136,7 +170,7 @@ def main():
     paths = maze.path_find(1, 48)
     for path in paths:
         print(path)
-        print(maze.path_to_operation(path))
+        print(maze.path_to_operation_basic(path, direction = None, starting = True))
 
 if __name__ == "__main__":
     main()
