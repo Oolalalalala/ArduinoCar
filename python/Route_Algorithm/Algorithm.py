@@ -5,6 +5,7 @@ class Map():
     def __init__(self, raw_map, x_width, y_width):
         #Create nodes
         self.nodes = [Node(i, self) for i in range(1, x_width * y_width + 1)]
+        self.score_points = []
         
         #Add neighbor if there is one in the direction for each node  
         for i in range(x_width * y_width):  
@@ -12,9 +13,10 @@ class Map():
                 if not raw_map[i + 1][j] == '':
                     self.nodes[i].add_neighbor(self.nodes[int(raw_map[i + 1][j]) - 1], j - 1)
                     
-        #Calculate score for each node
+        #Calculate score for each node and record score points
         for node in self.nodes:   
-            node.calculate_score()
+            if node.calculate_score() != 0:
+                self.score_points.append(node)
     
     #Find the shortest path from A to B
     def path_find(self, A_index, B_index):
@@ -59,7 +61,12 @@ class Map():
         #Remove all the paths that don't start with A
         while paths[0][0] != A_index:
             paths.popleft()
-                            
+        
+        best_ETA = float('Inf')
+        best_path = None
+        for path in paths:
+            operation = self.path_to_operation_basic(path)
+            if operation[2] < 
         return paths
     
     def path_to_operation(self, path, direction = None):
@@ -94,25 +101,32 @@ class Map():
             
         direction = self.nodes[path[0] - 1].get_direction(self.nodes[path[1] - 1]) if direction is None else direction
         operations = 'f' if starting else ''
+        ETA = 0
         
         #[0, 1, 2, 3] = [North, South, West, East]
         for i in range(1, len(path) - 1):
             next_direction = self.nodes[path[i] - 1].get_direction(self.nodes[path[i + 1] - 1])
+            
             if direction == next_direction:
                 operations += 'f'
+                ETA += 3   
             elif (direction, next_direction) in [(0, 1), (1, 0), (2, 3), (3, 2)]:
                 if self.nodes[path[i] - 1].neighbors[turn_left(direction)] is None:
                     operations += 'lf'
                 else:
                     operations += 'llf'
+                ETA += 2 + 3                
             elif (direction, next_direction) in [(0, 2), (2, 1), (1, 3), (3, 0)]:
                 operations += 'lf'
+                ETA += 1 + 3
             elif (direction, next_direction) in [(0, 3), (3, 1), (1, 2), (2, 0)]:
                 operations += 'rf'
+                ETA += 1 + 3 
             direction = next_direction
         
         operations = operations[:-1] + 'i'
-        return (operations, direction)
+        ETA += 2
+        return (operations, direction, ETA)
     
     #Print all nodes  
     def print(self):
@@ -147,6 +161,7 @@ class Node():
             self.score = self.x + self.y
         else:
             self.score = 0
+        return self.score
     
     #Format: Index:"index", x:"x", y:"y", score:"score", neighbors:[neighbor index list]
     def print(self):
@@ -168,9 +183,22 @@ def main():
     
     # Enter the start and end point here
     paths = maze.path_find(1, 48)
+    operations = []
+    
+    best_path, best_ETA = None, float('Inf')
     for path in paths:
+        print(best_path, best_ETA)
+        (best_path, best_ETA) = (path, path[2]) if best_ETA > path[2] else (best_path, best_ETA)
+    
+    print()
+    for path in paths:
+        operations.append(maze.path_to_operation_basic(path, direction = None, starting = True))
         print(path)
-        print(maze.path_to_operation_basic(path, direction = None, starting = True))
+        print()
+    print()
+    print(best_path)
+    
+    
 
 if __name__ == "__main__":
     main()
