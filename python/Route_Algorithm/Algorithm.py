@@ -64,10 +64,16 @@ class Map():
         
         best_ETA = float('Inf')
         best_path = None
+        best_operation = None
+        
         for path in paths:
             operation = self.path_to_operation_basic(path)
-            if operation[2] < 
-        return paths
+            if operation[2] < best_ETA:
+                best_ETA = operation[2]
+                best_path = path
+                best_operation = operation
+                
+        return best_path, *best_operation
     
     def path_to_operation(self, path, direction = None):
         direction = self.nodes[path[0] - 1].get_direction(self.nodes[path[1] - 1]) if direction is None else direction
@@ -182,23 +188,9 @@ def main():
     maze = Map(raw_map, 8, 6)
     
     # Enter the start and end point here
-    paths = maze.path_find(1, 48)
-    operations = []
-    
-    best_path, best_ETA = None, float('Inf')
-    for path in paths:
-        print(best_path, best_ETA)
-        (best_path, best_ETA) = (path, path[2]) if best_ETA > path[2] else (best_path, best_ETA)
-    
-    print()
-    for path in paths:
-        operations.append(maze.path_to_operation_basic(path, direction = None, starting = True))
-        print(path)
-        print()
-    print()
+    best_path = maze.path_find(1, 48)
     print(best_path)
     
     
-
 if __name__ == "__main__":
     main()
