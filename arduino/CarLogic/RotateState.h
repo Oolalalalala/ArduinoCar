@@ -35,7 +35,7 @@ public:
   virtual void OnStateExit() override;
 
 private:
-  bool leftRoute;
+  bool leftRoute;   
   bool routeCount;
 };
 

@@ -13,9 +13,24 @@ public:
   virtual void OnStateExit() override;
 
 private:
-  bool inNode;
   float offset, leftWheelSpeed, rightWheelSpeed;
+  bool m_OnNode;
 };
 
+class TestRFIDState : public CarState
+{
+public:
+  virtual void OnStateEnter() override;
+
+  virtual void OnStateUpdate(float dt) override;
+  
+  virtual void OnStateExit() override;
+
+private:
+  float offset, leftWheelSpeed, rightWheelSpeed;
+
+  bool m_ReturnedNode;
+  bool m_RFIDDetected;
+};
 
 #endif
