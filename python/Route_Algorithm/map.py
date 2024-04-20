@@ -6,13 +6,12 @@ class Map():
         #Create nodes
         self.nodes = [Node(i, self) for i in range(1, x_width * y_width + 1)]
         self.starting_point = self.nodes[starting_point_index - 1]
-        self.score_points = [self.starting_point]
+        self.score_points = []
         
         #Add neighbor if there is one in the direction for each node  
         for i in range(x_width * y_width):  
             for j in range(1, 5):
                 if not raw_map[i + 1][j] == '':
-                    print(i + 1, int(raw_map[i + 1][j]))
                     self.nodes[i].add_neighbor(self.nodes[int(raw_map[i + 1][j]) - 1], j - 1)
                     
         #Calculate score for each node and record score points
@@ -116,9 +115,8 @@ class Map():
                 return 0
         
         direction = self.nodes[path[0] - 1].get_direction(self.nodes[path[1] - 1]) if direction is None else direction
-        if not starting and direction is None:
-            direction = turn_left(turn_left(direction))
-            
+        if not starting:
+            direction = turn_left(turn_left(direction))        
         operations = 'f' if starting else ''
         ETA = 0
         
