@@ -2,9 +2,10 @@ import csv
 from collections import deque
 
 class Map():
-    def __init__(self, raw_map: list, x_width: int, y_width: int):
+    def __init__(self, raw_map: list, x_width: int, y_width: int, starting_point_index: int):
         #Create nodes
         self.nodes = [Node(i, self) for i in range(1, x_width * y_width + 1)]
+        self.starting_point = self.nodes[starting_point_index - 1]
         self.score_points = []
         
         #Add neighbor if there is one in the direction for each node  
@@ -19,7 +20,7 @@ class Map():
                 self.score_points.append(node)
     
     #Find the shortest path from A to B
-    def path_find(self, A_index: int, B_index: int, starting: bool) -> tuple:
+    def path_find(self, A_index: int, B_index: int) -> tuple:
         #BFS while keeping track of all the subpaths
         searched = set()
         #Each node in the search_queue is a tuple (index to be searhed, distance from A)
@@ -40,7 +41,11 @@ class Map():
                     
             #Add the searched node to the searched set after all its neighbors are searched
             searched.add(searching)
-        total_distance = distance
+        
+        if A_index != B_index:
+            total_distance = distance
+        else:
+            total_distance = 0
         
         #Trace back all the shortest path by using all the subpaths
         paths = deque([deque([B_index])])
@@ -62,14 +67,15 @@ class Map():
         while paths[0][0] != A_index:
             paths.popleft()
         
+        starting = True if A_index == self.starting_point.index else False
         best_ETA = float('Inf')
         best_path = None
         best_operation = None
         
         for path in paths:
             operation = self.path_to_operation_basic(path, starting)
-            if operation[2] < best_ETA:
-                best_ETA = operation[2]
+            if operation[1] < best_ETA:
+                best_ETA = operation[1]
                 best_path = path
                 best_operation = operation
                 
@@ -95,6 +101,9 @@ class Map():
     
     def path_to_operation_basic(self, path: deque, starting: bool = False, direction: int = None) -> tuple:
         
+        if len(path) == 1:
+            return ('', 0)
+        
         def turn_left(dir):
             if dir == 0:
                 return 2
@@ -106,9 +115,8 @@ class Map():
                 return 0
         
         direction = self.nodes[path[0] - 1].get_direction(self.nodes[path[1] - 1]) if direction is None else direction
-        if starting and direction is None:
-            direction = turn_left(turn_left(direction))
-            
+        if not starting:
+            direction = turn_left(turn_left(direction))        
         operations = 'f' if starting else ''
         ETA = 0
         
@@ -135,7 +143,7 @@ class Map():
         
         operations = operations[:-1] + 'i'
         ETA += 2
-        return (operations, direction, ETA)
+        return (operations, ETA)
     
     #Print all nodes  
     def print(self):
@@ -167,7 +175,7 @@ class Node():
             if neighbor is not None:
                 neighbor_count += 1
         if neighbor_count == 1:
-            self.score = self.x + self.y
+            self.score = abs(self.x - self.map.starting_point.x) + abs(self.y - self.map.starting_point.y)
         else:
             self.score = 0
         return self.score
@@ -188,10 +196,10 @@ def read_csv(file) -> list:
 
 def main():
     raw_map = read_csv('python\\Route_Algorithm\\maze.csv')
-    maze = Map(raw_map, 8, 6)
+    maze = Map(raw_map, 8, 6, starting_point_index = 1)
     
     # Enter the start and end point here
-    best_path = maze.path_find(1, 48, starting = True)
+    best_path = maze.path_find(1, 1)
     print(best_path)
     
     
