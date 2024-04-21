@@ -1,79 +1,65 @@
-import threading
-import time
-import sys
-import serial
+import logging
+from time import sleep
+
+from serial import Serial
+from serial.serialutil import SerialException
+
+log = logging.getLogger(__name__)
+
+# these codes are for bluetooth
+# hint: please check the function "sleep". how does it work?
 
 
-class bluetooth:
-    def __init__(self, port: str, baudrate: int = 9600):
-        """Initialize an BT object, and auto-connect it."""
-        # The port name is the name shown in control panel
-        # And the baudrate is the communication setting, default value of HC-05 is 9600.
-        self.ser = serial.Serial(port, baudrate=baudrate)
+class Bluetooth:
+    """
+    The Bluetooth class is used to connect to the Arduino via Bluetooth.
+    """
 
-    def is_open(self) -> bool:
-        return self.ser.is_open
+    def __init__(self):
+        self.serial = Serial()
 
-    def waiting(self) -> bool:
-        return self.ser.in_waiting
-
-    def do_connect(self, port: str, baudrate: int = 9600) -> bool:
-        """Connect to the specify port with particular baudrate"""
-        # Connection function. Disconnect the previous communication, specify a new one.
-        self.disconnect()
-
+    def do_connect(self, port: str):
+        self.serial.close()
+        log.info(f"Connecting to {port}...")
         try:
-            self.ser = serial.Serial(port, baudrate=baudrate)
-            return True
-        except:
+            self.serial = Serial(port, 9600, timeout=2)
+            log.info("Success\n")
+        except SerialException:
+            log.warning("Fail to connect\n")
             return False
+        return True
 
     def disconnect(self):
-        """Close the connection."""
-        self.ser.close()
+        self.serial.close()
 
-    def write(self, output: str):
-        # Write the byte to the output buffer, encoded by utf-8.
-        send = output.encode("utf-8")
-        self.ser.write(send)
+    def serial_write_string(self, data: str):
+        send = data.encode("utf-8")
+        self.serial.write(send)
 
-    def readString(self) -> str:
-        # Scan the input buffer until meet a '\n'. return none if doesn't exist.
-        if self.waiting():
-            receiveMsg = self.ser.readline().decode("utf-8")[:-1]
+    def serial_write_bytes(self, data: bytes):
+        self.serial.write(data)
 
-        return receiveMsg
+    def serial_read_string(self):
+        waiting = self.serial.in_waiting
+        if waiting >= 0:
+            rv = self.serial.readline().decode("utf-8")[:-1]
+            return rv
+        return ""
 
-
-def read():
-    while True:
-        if bt.waiting():
-            print(bt.readString())
-
-
-def write():
-    while True:
-        msgWrite = input()
-
-        if msgWrite == "exit":
-            sys.exit()
-
-        bt.write(msgWrite + "\n")
-
-
-if __name__ == "__main__":
-    # TODO: Please modify the port name.
-    bt = bluetooth("COM7")
-    while not bt.is_open():
-        pass
-    print("BT Connected!")
-
-    readThread = threading.Thread(target=read)
-    readThread.daemon = True
-    readThread.start()
-
-    while True:
-        msgWrite = input()
-        if msgWrite == "exit":
-            sys.exit()
-        bt.write(msgWrite)
+    def serial_read_byte(self):
+        sleep(0.05)
+        waiting = self.serial.in_waiting
+        rv = self.serial.read(waiting)
+        if rv:
+            uid = hex(int.from_bytes(rv, byteorder="big", signed=False))
+            self.serial.reset_input_buffer()
+            return uid
+        else:
+            return 0
+        
+    """def read(self):
+        waiting = self.serial.in_waiting
+        if waiting >= 0:
+            rv = self.serial.read(waiting)
+            return rv
+        return """
