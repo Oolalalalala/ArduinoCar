@@ -1,23 +1,35 @@
-#ifndef BACIS_CONTROL_H
+#ifndef BASIC_CONTROL_H
 #define BASIC_CONTROL_H
 
-#include "Arduino.h"
 
-#define PWMA 11
-#define PWMB 12
-#define AIN1 2
-#define AIN2 3
-#define BIN1 5
-#define BIN2 6
-const int speed = 255;
+class InferredSensorArray
+{
+public:
+  static void Initialize();
+  static void CollectState();
+  static int GetState(int index); // 0 is the left-most sensor, 4 for the right-most sensor
+  static int GetDetectionCount();
+  static float GetNormalizedErrorValue(float e0, float e1, float e2, float e3, float e4);
 
-void InitPins();
-void MoveWheel(int leftSpeed, int rightSpeed);
-void CollectPinValue();
-int GetOffsetValue();
-bool OnNode();
-bool OnRoute();
-int GetDetectorCount();
-float GetDeltaTime();
+private:
+  static int s_SensorStates[5];
+};
+
+class CarMotor
+{
+public:
+  static void SetSpeed(int leftSpeed, int rightSpeed); // Range: [-255, 255]
+};
+
+class Timer
+{
+public:
+  Timer();
+
+  float Tick(); // In seconds
+  
+private:
+  unsigned long m_Time;
+};
 
 #endif

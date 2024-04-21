@@ -2,87 +2,90 @@
 #include "Arduino.h"
 
 
-void InitPins()
+#define PWMA 11
+#define PWMB 12
+#define AIN1 2
+#define AIN2 3
+#define BIN1 5
+#define BIN2 6
+
+
+int InferredSensorArray::s_SensorStates[5];
+
+void InferredSensorArray::Initialize()
 {
-    pinMode(PWMA, OUTPUT);
-    pinMode(PWMB, OUTPUT);
-    pinMode(AIN1, OUTPUT);
-    pinMode(AIN2, OUTPUT);
-    pinMode(BIN1, OUTPUT);
-    pinMode(BIN2, OUTPUT);
+  pinMode(PWMA, OUTPUT);
+  pinMode(PWMB, OUTPUT);
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  pinMode(BIN1, OUTPUT);
+  pinMode(BIN2, OUTPUT);
 }
 
-
-void MoveWheel(int leftSpeed, int rightSpeed)
+void InferredSensorArray::CollectState()
 {
-  if (leftSpeed > 0)
+  s_SensorStates[0] = digitalRead(32);
+  s_SensorStates[1] = digitalRead(34);
+  s_SensorStates[2] = digitalRead(36);
+  s_SensorStates[3] = digitalRead(38);
+  s_SensorStates[4] = digitalRead(40);
+}
+
+int InferredSensorArray::GetState(int index)
+{
+  return s_SensorStates[index];
+}
+
+int InferredSensorArray::GetDetectionCount()
+{
+  return s_SensorStates[0] + s_SensorStates[1] + s_SensorStates[2] + s_SensorStates[3] + s_SensorStates[4];
+}
+
+float InferredSensorArray::GetNormalizedErrorValue(float e0, float e1, float e2, float e3, float e4)
+{
+  float error = e0 * s_SensorStates[0] + e1 * s_SensorStates[1] + e2 * s_SensorStates[2] + e3 * s_SensorStates[3] + e4 * s_SensorStates[4];
+  return error / GetDetectionCount();
+}
+
+void CarMotor::SetSpeed(int leftWheelSpeed, int rightWheelSpeed)
+{
+  if (leftWheelSpeed > 0)
   {
     digitalWrite(BIN1, HIGH);
     digitalWrite(BIN2, LOW);
-    analogWrite(PWMB, leftSpeed);
+    analogWrite(PWMB, leftWheelSpeed);
   }
   else
   {
     digitalWrite(BIN1, LOW);
     digitalWrite(BIN2, HIGH);
-    analogWrite(PWMB, -leftSpeed);
+    analogWrite(PWMB, -leftWheelSpeed);
   }
 
   
-  if (rightSpeed > 0)
+  if (rightWheelSpeed > 0)
   {
     digitalWrite(AIN1, LOW);
     digitalWrite(AIN2, HIGH);
-    analogWrite(PWMA, rightSpeed);
+    analogWrite(PWMA, rightWheelSpeed);
   }
   else
   {
     digitalWrite(AIN1, HIGH);
     digitalWrite(AIN2, LOW);
-    analogWrite(PWMA, -rightSpeed);
+    analogWrite(PWMA, -rightWheelSpeed);
   }
 }
 
-
-int r1, r2, r3, r4, r5;
-
-void CollectPinValue()
+Timer::Timer()
 {
-  r1 = digitalRead(32);
-  r2 = digitalRead(34);
-  r3 = digitalRead(36);
-  r4 = digitalRead(38);
-  r5 = digitalRead(40);
+  m_Time = micros();
 }
 
-int GetOffsetValue()
+float Timer::Tick()
 {
-  return (r1 * -4 + r2 * -1 + r4 * 1 + r5 * 4) / (r1 + r2 + r3 + r4 + r5);
-}
-
-bool OnNode()
-{
-  return r1 & r2 & r3 & r4 & r5;
-}
-
-bool OnRoute()
-{
-  if (OnNode())
-    return false;
-  return r1 | r2 | r3 | r4 | r5;
-}
-
-int GetDetectorCount()
-{
-  return r1 + r2 + r3 + r4 + r5;
-}
-
-
-unsigned long oldTime = 0, currentTime = 0;
-
-float GetDeltaTime()
-{
-   oldTime = currentTime;
-   currentTime = micros();
-   return 0.000001f * (currentTime - oldTime);
+  unsigned long currentTime = micros();
+  unsigned long delta = currentTime - m_Time;
+  m_Time = currentTime;
+  return delta * 0.000001f;
 }

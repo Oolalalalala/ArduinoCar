@@ -1,8 +1,7 @@
 #ifndef STATE_MACHINE_H
 #define STATE_MACHINE_H
 
-#include "CarCommandQueue.h"
-#include "BaseState.h"
+#include "CarState.h"
 
 class CarStateMachine
 {
@@ -10,9 +9,10 @@ public:
   CarStateMachine();
   ~CarStateMachine();
   
+  void WaitForInitialCommand();
   void OnUpdate(float dt);
 
-  // Mark the current state as finished, a new state will be grabbed from 
+  // Mark the current state as finished, a new state will be grabbed from bluetooth
   void NextState();
 
 private:

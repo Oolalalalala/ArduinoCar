@@ -19,7 +19,7 @@ class bluetooth:
 
     def do_connect(self, port: str, baudrate: int = 9600) -> bool:
         """Connect to the specify port with particular baudrate"""
-        # Connection function. Disconnect the previous communication, specify a new one.
+        # Connection function. Disconnect the previous communica   tion, specify a new one.
         self.disconnect()
 
         try:
@@ -63,7 +63,7 @@ def write():
 
 if __name__ == "__main__":
     # TODO: Please modify the port name.
-    bt = bluetooth("COM7")
+    bt = bluetooth("COM3")
     while not bt.is_open():
         pass
     print("BT Connected!")

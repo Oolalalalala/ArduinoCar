@@ -1,9 +1,8 @@
 #ifndef BLUETOOTH_H
 #define BLUETOOTH_H
 
-#include "Buffer.h"
-#include "CarCommandQueue.h"
-
+#include "stdint.h"
+#include "CarState.h"
 
 class Bluetooth
 {

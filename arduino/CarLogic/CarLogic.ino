@@ -1,24 +1,30 @@
 #include "BasicControl.h"
-#include "BaseState.h"
-#include "ForwardState.h"
-#include "RFID.h"
 #include "StateMachine.h"
+#include "BasicControl.h"
 #include "Bluetooth.h"
+#include "RFID.h"
 
-void setup() {
-  InitPins();
+
+CarStateMachine* stateMachine;
+
+void setup() 
+{
   Serial.begin(9600);
+
+  InferredSensorArray::Initialize();
   Bluetooth::Initialize();
   RFID::Initialize();
+
+  stateMachine = new CarStateMachine();
+  stateMachine->WaitForInitialCommand();
 }
 
-
-CarStateMachine stateMachine;
+Timer timer;
 
 void loop() 
 {
-  CollectPinValue();
+  InferredSensorArray::CollectState();
 
-  float dt = GetDeltaTime();
-  stateMachine.OnUpdate(dt);
+  float dt = timer.Tick();
+  stateMachine->OnUpdate(dt);
 }
