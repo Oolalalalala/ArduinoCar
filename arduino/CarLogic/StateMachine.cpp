@@ -71,13 +71,15 @@ void CarStateMachine::OnUpdate(float dt)
     m_StateEnded = false;
     Bluetooth::SendMessage(1, nullptr, 0); // Request a new command
   }
-
+  
+	// Tries to grab a command from bluetooth if there is none in the buffer
   if (m_BufferedCommand == CarCommand::None)
   {
     if (Bluetooth::AvailableStateMessageCount())
       m_BufferedCommand = Bluetooth::ReadStateMessage();
   }
 
+	// Transition into new state when there is a command in the buffer
   if (!m_State && m_BufferedCommand != CarCommand::None)
   {
     // New state from command
