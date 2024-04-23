@@ -8,7 +8,9 @@
 
 void ForwardState::OnStateEnter()
 {
+  m_ExitDelayTimer = 0.0f;
   m_OnNode = false;
+  m_ExitNode = false;
   Serial.println("Forward state begin");
 }
 
@@ -31,13 +33,19 @@ void ForwardState::OnStateUpdate(float dt)
   CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
 
   // Enters the node
-  if (InferredSensorArray::GetDetectionCount() == 5)
+  if (InferredSensorArray::GetDetectionCount() >= 4)
   {
     m_OnNode = true;
   }
-  else if (m_OnNode)
+  if (m_OnNode && InferredSensorArray::GetDetectionCount() < 4)
   {
-    m_StateMachine->NextState();
+    m_ExitNode = true;
+  }
+  if (m_ExitNode)
+  {
+    m_ExitDelayTimer += dt;
+    if (m_ExitDelayTimer > CAR_FORWARD_EXIT_STATE_DELAY)
+      m_StateMachine->NextState();
   }
 }
 
@@ -48,8 +56,10 @@ void ForwardState::OnStateExit()
 
 void TestRFIDState::OnStateEnter()
 {
-  m_ReturnedNode = false;
   m_RFIDDetected = false;
+  m_ReturnedNode = false;
+  m_ExitNode = false;
+  m_ExitDelayTimer = 0.0f;
 
   Serial.println("TestRFID state begin");
 }
@@ -93,10 +103,16 @@ void TestRFIDState::OnStateUpdate(float dt)
   }
   else
   {
-    if (InferredSensorArray::GetDetectionCount() == 5)
+    if (InferredSensorArray::GetDetectionCount() >= 4)
       m_ReturnedNode = true;
-    else if (m_ReturnedNode)
-      m_StateMachine->NextState();
+    if (m_ReturnedNode && InferredSensorArray::GetDetectionCount() < 4)
+      m_ExitNode = true;
+    if (m_ExitNode)
+    {
+      m_ExitDelayTimer += dt;
+      if (m_ExitDelayTimer > CAR_FORWARD_EXIT_STATE_DELAY)
+        m_StateMachine->NextState();
+    }
 
     if (m_ReturnedNode)
       CarMotor::SetSpeed(CAR_SPEED * CAR_LEFT_WHEEL_SPEED_RATIO, CAR_SPEED * CAR_RIGHT_WHEEL_SPEED_RATIO);
@@ -113,6 +129,7 @@ void TestRFIDState::OnStateExit()
 
 void RotateLeftState::OnStateEnter()
 {
+  m_ImmunityTimer = 0.0f;
   leftRoute = false;
   Serial.println("Turn left state begin");
 }
@@ -120,11 +137,12 @@ void RotateLeftState::OnStateEnter()
 void RotateLeftState::OnStateUpdate(float dt)
 {
   CarMotor::SetSpeed(-CAR_SPEED * CAR_LEFT_WHEEL_SPEED_RATIO, CAR_SPEED * CAR_RIGHT_WHEEL_SPEED_RATIO);
+  m_ImmunityTimer += dt;
 
   if (!leftRoute && InferredSensorArray::GetDetectionCount() == 0)
     leftRoute = true;
 
-  if (leftRoute && InferredSensorArray::GetDetectionCount() != 0)
+  if (m_ImmunityTimer > CAR_ROATATION_EXIT_STATE_IMMUNITY_TIME && leftRoute && InferredSensorArray::GetDetectionCount() != 0)
     m_StateMachine->NextState();
 }
 
@@ -136,6 +154,7 @@ void RotateLeftState::OnStateExit()
 
 void RotateRightState::OnStateEnter()
 {
+  m_ImmunityTimer = 0.0f;
   leftRoute = false;
   Serial.println("Turn right state begin");
 }
@@ -143,11 +162,12 @@ void RotateRightState::OnStateEnter()
 void RotateRightState::OnStateUpdate(float dt)
 {
   CarMotor::SetSpeed(CAR_SPEED * CAR_LEFT_WHEEL_SPEED_RATIO, -CAR_SPEED * CAR_RIGHT_WHEEL_SPEED_RATIO);
+  m_ImmunityTimer += dt;
 
   if (!leftRoute && InferredSensorArray::GetDetectionCount() == 0)
     leftRoute = true;
 
-  if (leftRoute && InferredSensorArray::GetDetectionCount() != 0)
+  if (m_ImmunityTimer > CAR_ROATATION_EXIT_STATE_IMMUNITY_TIME && leftRoute && InferredSensorArray::GetDetectionCount() != 0)
     m_StateMachine->NextState();
 }
 

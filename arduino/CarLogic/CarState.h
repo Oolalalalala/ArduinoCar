@@ -34,7 +34,9 @@ public:
   virtual void OnStateExit() override;
 
 private:
+  float m_ExitDelayTimer;
   bool m_OnNode;
+  bool m_ExitNode;
 };
 
 class TestRFIDState : public CarState
@@ -45,8 +47,10 @@ public:
   virtual void OnStateExit() override;
 
 private:
-  bool m_ReturnedNode;
   bool m_RFIDDetected;
+  bool m_ReturnedNode;
+  bool m_ExitNode;
+  float m_ExitDelayTimer;
 };
 
 class RotateLeftState : public CarState
@@ -57,6 +61,7 @@ public:
   virtual void OnStateExit() override;
 
 private:
+  float m_ImmunityTimer;
   bool leftRoute;
 };
 
@@ -69,6 +74,7 @@ public:
   virtual void OnStateExit() override;
 
 private:
+  float m_ImmunityTimer;
   bool leftRoute;
 };
 

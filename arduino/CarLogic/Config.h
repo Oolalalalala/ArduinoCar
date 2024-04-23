@@ -13,7 +13,7 @@
 #define CAR_FORWARD_EXIT_STATE_DELAY 0.1f
 
 // In order to prevent detection of the corner of a node, a minimum time required to exit a rotation state is added
-#define CAR_ROATATION_EXIT_STATE_IMMUNITY_TIME 0.5f
+#define CAR_ROATATION_EXIT_STATE_IMMUNITY_TIME 0.2f
 
 // Path tracing coefficients
 #define CAR_PATH_TRACE_ADJUST_STRENGTH 0.2f
