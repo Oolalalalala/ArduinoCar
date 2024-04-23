@@ -59,3 +59,8 @@ class Bluetooth:
         
     def getmessegecount(self):
         return self.serial.in_waiting
+    
+    def read(self):
+        waiting = self.serial.in_waiting
+        rv = self.serial.read(waiting)
+        return rv
