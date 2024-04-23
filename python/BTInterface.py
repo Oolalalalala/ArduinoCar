@@ -24,7 +24,7 @@ class BTInterface:
 
     def start(self):
         input("Press enter to start.")
-        self.bt.serial_write_string("s")
+        # self.bt.serial_write_string("s")
 
     def get_UID(self):
         return self.bt.serial_read_byte()
