@@ -25,14 +25,14 @@ def main():
                     messege[i]=m[j]
                     i+=1
                     j+=1
-                if messege[3]=='>' or messege[7]=='>':
-                    if messege[1]=='1':
+                if messege[3]==b'>' or messege[7]==b'>':
+                    if messege[1]==b'0x01':
                         dir=operations[route,num]
                         bti1.send_action(dir)
                         num+=1
                         print("node")
 
-                    elif messege[1] == '2':
+                    elif messege[1] == b'0x2':
                         for k in range(4):
                             a[k]=messege[k+3]
                         uid = hex(int.from_bytes(a, byteorder="big", signed=False))
