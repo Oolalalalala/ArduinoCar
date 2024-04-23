@@ -29,10 +29,10 @@ class BTInterface:
     def get_UID(self):
         return self.bt.serial_read_byte()
 
-    def send_action(self, dirc):
-        # send the action to car
-        self.bt.serial_write_bytes(self, dirc) #ggggggggggggggggggggggg
-        #return
+    # def send_action(self, dirc):
+    #     # send the action to car
+    #     self.bt.serial_write_bytes(self, dirc)
+    #     #return
 
     def end_process(self):
         self.bt.serial_write_string("e")
@@ -42,7 +42,7 @@ class BTInterface:
     #     return self.bt.read()
     
     def getmessegecount(self):
-        return self.bt.serial.in_waiting()
+        return self.bt.serial.in_waiting
         
 
 

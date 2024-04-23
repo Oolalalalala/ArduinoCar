@@ -19,12 +19,14 @@ def main():
             i=0
             while start==1:
                 waiting = bti1.getmessegecount()
+                print(waiting)
                 m = bti1.bt.read()
                 j = 0
                 while j < waiting-1:
                     messege[i]=m[j]
                     i+=1
                     j+=1
+                print(messege)
                 if messege[3]==b'>' or messege[7]==b'>':
                     if messege[1]==b'0x01':
                         dir=operations[route,num]

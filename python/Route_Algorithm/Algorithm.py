@@ -51,9 +51,9 @@ def calcultate_path():
     
     
     best_route = g[2**SP_num - 1 - (1 << best_end)][best_end][0]
-    best_total_operations = deque([paths_from_start[best_route[0]][1]])
+    best_total_operations = deque(paths_from_start[best_route[0]][1])
     for i in range(1, SP_num):
-        best_total_operations.append(all_paths[best_route[i - 1]][best_route[i]][1])
+        best_total_operations += deque(all_paths[best_route[i - 1]][best_route[i]][1])
         
     calculated = True
 
