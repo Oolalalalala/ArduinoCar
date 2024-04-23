@@ -18,10 +18,10 @@ def main():
             start=1
             i=0
             while start==1:
-                waiting=bti1.getmessegecount()
-                m=bti1.read()
-                j=0
-                while j <waiting-1:
+                waiting = bti1.getmessegecount()
+                m = bti1.bt.read()
+                j = 0
+                while j < waiting-1:
                     messege[i]=m[j]
                     i+=1
                     j+=1
