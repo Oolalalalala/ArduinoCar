@@ -41,8 +41,8 @@ class BTInterface:
     def read(self):
         return self.bt.read()
     
-    def getmessegecount(self):
-        return self.bt.serial.in_waiting()
+    def getmessagecount(self):
+        return self.bt.serial.in_waiting
         
 
 
