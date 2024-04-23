@@ -38,8 +38,8 @@ class BTInterface:
         self.bt.serial_write_string("e")
         self.bt.disconnect()
 
-    def read(self):
-        return self.bt.read()
+    # def read(self):
+    #     return self.bt.read()
     
     def getmessagecount(self):
         return self.bt.serial.in_waiting
