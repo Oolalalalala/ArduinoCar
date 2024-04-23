@@ -1,5 +1,8 @@
 import math
-from map import *
+try:
+    from .map import *
+except ImportError:
+    from map import *
 
 calculated = False
 
@@ -14,8 +17,7 @@ def calcultate_path():
     raw_map = read_csv('python\\Route_Algorithm\\maze.csv')
     maze = Map(raw_map, 6, 8, starting_point_index = 1)
     SP_num = len(maze.score_points)
-    
-    
+
     #Held-Karp Algorithm
     paths_from_start = [maze.path_find(maze.starting_point.index, maze.score_points[i].index) for i in range(SP_num)]
     all_paths = [[maze.path_find(maze.score_points[i].index, maze.score_points[j].index) for j in range(SP_num)] for i in range(SP_num)]
