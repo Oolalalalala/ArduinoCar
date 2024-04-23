@@ -57,9 +57,5 @@ class Bluetooth:
         else:
             return 0
         
-    """def read(self):
-        waiting = self.serial.in_waiting
-        if waiting >= 0:
-            rv = self.serial.read(waiting)
-            return rv
-        return """
+    def getmessegecount(self):
+        return self.serial.in_waiting

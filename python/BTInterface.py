@@ -39,7 +39,7 @@ class BTInterface:
         self.bt.disconnect()
 
     def read(self) ->str:
-        return self.bt.serial_read_string
+        return self.bt.serial_read_string()
         
 
 
