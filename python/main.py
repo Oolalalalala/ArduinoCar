@@ -1,7 +1,6 @@
 import bluetooth as bt
 import BTInterface as bti
-import Algorithm as ag
-
+from Route_Algorithm import Algorithm as ag
 def main():
     bti1 = bti.BTInterface()
     bti1.start()
@@ -35,7 +34,7 @@ def main():
                         print("node")
 
                     elif message[1] == '2':
-                        
+
                         uid = hex(int.from_bytes(rv, byteorder="big", signed=False))
                         num=0
                         route+=1
