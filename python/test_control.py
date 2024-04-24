@@ -71,6 +71,5 @@ if __name__ == "__main__":
         msgWrite = input()
         if msgWrite == "exit":
             sys.exit()
-        for cmd in msgWrite:
-            if '0' <= cmd and cmd <= '9':
-                bt.write(chr(ord(cmd) - ord('0')))
+        bt.write(msgWrite)
+
