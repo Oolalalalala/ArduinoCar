@@ -1,6 +1,6 @@
 import sys
 import threading
-import bluetooth as BT
+import python.Bluetoobh.bluetooth as BT
 
 
 def read():
