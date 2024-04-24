@@ -6,8 +6,11 @@ def main():
     bti1 = bti.BTInterface()
     bti1.start()
     operations = ag.get_total_operations()
+    preview = ag.get_best_route()
     m_buffer = bytes()
     route, num = 0, 0
+
+    print(preview)
 
     for _ in range(2):
         bti1.bt.serial_write_bytes(operations.popleft().encode("utf-8"))
