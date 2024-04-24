@@ -11,6 +11,7 @@ def main():
     route, num = 0, 0
 
     print(preview)
+    print(operations)
 
     for _ in range(2):
         bti1.bt.serial_write_bytes(operations.popleft().encode("utf-8"))
