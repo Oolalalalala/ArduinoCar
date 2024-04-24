@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
-
-from python.Bluetoobh.bluetooth import Bluetooth
+from .bluetooth import *
 
 log = logging.getLogger(__name__)
 

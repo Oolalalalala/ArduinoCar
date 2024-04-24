@@ -1,7 +1,5 @@
-import python.Bluetoobh.bluetooth as bt
-import python.Bluetoobh.BTInterface as bti
+import Bluetooth.BTInterface as bti
 from Route_Algorithm import Algorithm as ag
-from collections import deque
 
 def main():
     bti1 = bti.BTInterface()
