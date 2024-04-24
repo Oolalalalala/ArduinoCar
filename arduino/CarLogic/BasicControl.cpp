@@ -43,11 +43,8 @@ int InferredSensorArray::GetDetectionCount()
 
 float InferredSensorArray::GetNormalizedErrorValue(float e0, float e1, float e2, float e3, float e4)
 {
-  int count = GetDetectionCount();
-  if (count == 0)
-    return 0;
   float error = e0 * s_SensorStates[0] + e1 * s_SensorStates[1] + e2 * s_SensorStates[2] + e3 * s_SensorStates[3] + e4 * s_SensorStates[4];
-  return error / count;
+  return error / GetDetectionCount();
 }
 
 void InferredSensorArray::DebugOutput()

@@ -101,6 +101,12 @@ class Map():
     
     def path_to_operation_basic(self, path: deque, starting: bool = False, direction: int = None) -> tuple:
         
+        f_time = 2.4
+        l_time = 0.38
+        l2_time = 0.64
+        r_time = 0.38
+        i_time = 1.8
+        
         if len(path) == 1:
             return ('', 0)
         
@@ -126,23 +132,23 @@ class Map():
             
             if direction == next_direction:
                 operations += 'f'
-                ETA += 3   
+                ETA += f_time
             elif (direction, next_direction) in [(0, 1), (1, 0), (2, 3), (3, 2)]:
                 if self.nodes[path[i] - 1].neighbors[turn_left(direction)] is None:
                     operations += 'lf'
                 else:
                     operations += 'llf'
-                ETA += 2 + 3                
+                ETA += l2_time + f_time    
             elif (direction, next_direction) in [(0, 2), (2, 1), (1, 3), (3, 0)]:
                 operations += 'lf'
-                ETA += 1 + 3
+                ETA += l_time + f_time
             elif (direction, next_direction) in [(0, 3), (3, 1), (1, 2), (2, 0)]:
                 operations += 'rf'
-                ETA += 1 + 3 
+                ETA += r_time + f_time
             direction = next_direction
         
         operations = operations[:-1] + 'i'
-        ETA += 2
+        ETA += i_time
         return (operations, ETA)
     
     #Print all nodes  

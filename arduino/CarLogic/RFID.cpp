@@ -26,11 +26,10 @@ uint32_t RFID::ReadValue()
     mfrc522->PICC_DumpDetailsToSerial(&(mfrc522->uid));
 
     uint32_t value;
-    value =  (uint32_t)mfrc522->uid.uidByte[0] << 24;
-    value += (uint32_t)mfrc522->uid.uidByte[1] << 16;
-    value += (uint32_t)mfrc522->uid.uidByte[2] << 8;
-    value += (uint32_t)mfrc522->uid.uidByte[3];
-    
+    value =  mfrc522->uid.uidByte[0] << 24;
+    value += mfrc522->uid.uidByte[1] << 16;
+    value += mfrc522->uid.uidByte[2] << 8;
+    value += mfrc522->uid.uidByte[3];
 
     mfrc522->PICC_HaltA();
     mfrc522->PCD_StopCrypto1();
