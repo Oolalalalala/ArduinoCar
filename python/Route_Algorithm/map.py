@@ -101,7 +101,7 @@ class Map():
     
     def path_to_operation_basic(self, path: deque, starting: bool = False, direction: int = None) -> tuple:
         
-        f_time = 1.2
+        f_time = 2.4
         l_time = 0.38
         l2_time = 0.64
         r_time = 0.38
