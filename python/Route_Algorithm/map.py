@@ -103,7 +103,7 @@ class Map():
         
         f_time = 1.2
         l_time = 0.38
-        l2_time = 0.76
+        l2_time = 0.64
         r_time = 0.38
         i_time = 1.8
         
