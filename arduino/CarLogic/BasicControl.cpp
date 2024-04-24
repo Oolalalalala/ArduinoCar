@@ -50,6 +50,16 @@ float InferredSensorArray::GetNormalizedErrorValue(float e0, float e1, float e2,
   return error / count;
 }
 
+void InferredSensorArray::DebugOutput()
+{
+  Serial.print(s_SensorStates[0]);
+  Serial.print(s_SensorStates[1]);
+  Serial.print(s_SensorStates[2]);
+  Serial.print(s_SensorStates[3]);
+  Serial.print(s_SensorStates[4]);
+  Serial.print('\n');
+}
+
 void CarMotor::SetSpeed(int leftWheelSpeed, int rightWheelSpeed)
 {
   if (leftWheelSpeed > 0)

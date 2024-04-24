@@ -8,7 +8,7 @@
 
 void ForwardState::OnStateEnter()
 {
-  m_ExitDelayTimer = 0.0f;
+  m_DelayTimer = 0.0f;
   m_OnNode = false;
   m_ExitNode = false;
   Serial.println("Forward state begin");
@@ -32,19 +32,26 @@ void ForwardState::OnStateUpdate(float dt)
 
   CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
 
+
   // Enters the node
-  if (InferredSensorArray::GetDetectionCount() >= 4)
+  if (InferredSensorArray::GetDetectionCount() == 5)
   {
     m_OnNode = true;
   }
-  if (m_OnNode && InferredSensorArray::GetDetectionCount() < 4)
+  if (m_OnNode)
   {
-    m_ExitNode = true;
+    m_DelayTimer += dt;
+    if (m_DelayTimer >= CAR_FORWARD_ENTER_NODE_IMMUNITY_TIME && InferredSensorArray::GetDetectionCount() < 5)
+    {
+      m_DelayTimer = 0.0f;
+      m_OnNode = false;
+      m_ExitNode = true;
+    }
   }
   if (m_ExitNode)
   {
-    m_ExitDelayTimer += dt;
-    if (m_ExitDelayTimer > CAR_FORWARD_EXIT_STATE_DELAY)
+    m_DelayTimer += dt;
+    if (m_DelayTimer >= CAR_FORWARD_EXIT_STATE_DELAY)
       m_StateMachine->NextState();
   }
 }
@@ -103,21 +110,21 @@ void TestRFIDState::OnStateUpdate(float dt)
   }
   else
   {
-    if (InferredSensorArray::GetDetectionCount() >= 4)
+    if (InferredSensorArray::GetDetectionCount() == 5)
       m_ReturnedNode = true;
-    if (m_ReturnedNode && InferredSensorArray::GetDetectionCount() < 4)
+    if (m_ReturnedNode && InferredSensorArray::GetDetectionCount() <= 4)
       m_ExitNode = true;
     if (m_ExitNode)
     {
       m_ExitDelayTimer += dt;
-      if (m_ExitDelayTimer > CAR_FORWARD_EXIT_STATE_DELAY)
+      if (m_ExitDelayTimer > CAR_RFID_EXIT_STATE_DEALY)
         m_StateMachine->NextState();
     }
 
     if (m_ReturnedNode)
       CarMotor::SetSpeed(CAR_SPEED * CAR_LEFT_WHEEL_SPEED_RATIO, CAR_SPEED * CAR_RIGHT_WHEEL_SPEED_RATIO);
     else
-      CarMotor::SetSpeed(-CAR_SPEED * CAR_LEFT_WHEEL_SPEED_RATIO, -CAR_SPEED * CAR_RIGHT_WHEEL_SPEED_RATIO);
+      CarMotor::SetSpeed(-CAR_SPEED * CAR_REVERSE_LEFT_WHEEL_SPEED_RATIO, -CAR_SPEED * CAR_REVERSE_RIGHT_WHEEL_SPEED_RATIO);
   }
 }
 

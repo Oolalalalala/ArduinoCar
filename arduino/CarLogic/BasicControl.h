@@ -11,6 +11,9 @@ public:
   static int GetDetectionCount();
   static float GetNormalizedErrorValue(float e0, float e1, float e2, float e3, float e4);
 
+  // Debug
+  static void DebugOutput();
+
 private:
   static int s_SensorStates[5];
 };
