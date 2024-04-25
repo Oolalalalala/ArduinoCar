@@ -18,7 +18,7 @@ def main():
     log = logging.getLogger("scoreboard")
     logging.basicConfig(level=logging.DEBUG)
 
-    scoreboard=sc.ScoreboardServer("pyparty", host=f"http://140.112.175.18:5000")
+    scoreboard=sc.ScoreboardServer("chichonlo", host=f"http://140.112.175.18:5000")
     time_remaining = 81
     while time_remaining>80.5:
         score, time_remaining = scoreboard.add_UID("00000000")
@@ -36,9 +36,10 @@ def main():
             print(m_buffer)
             if m_buffer[1] == 1:
                 dir = operations.popleft()
-                dir = "l" if dir == "L" else dir
-                print(dir)
-                bti1.bt.serial_write_bytes(dir.encode("utf-8"))
+                outdir = "l" if dir == "L" else dir
+                print(outdir)
+                bti1.bt.serial_write_bytes(outdir.encode("utf-8"))
+                num += 1
                 m_buffer = m_buffer[4:]
                 print("Next State")
             elif m_buffer[1] == 2:
@@ -51,16 +52,19 @@ def main():
                 print(uid)
 
             elif m_buffer[1] == 3:
-                dir = operations.popleft()
-                if dir == 'r':
-                    fixdir = 'l'
+                if dir=='r':
+                    fixdir='l'
+                    print(fixdir)
                     bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
-                elif dir == 'L' or (dir == 'l' and operations[0] == 'l'):
+                elif dir=='L' or (dir=='l' and operations[0]=='l'):
                     fixdir = operations.popleft()
+                    print(fixdir)
                     bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
-                elif dir == 'l':
-                    fixdir = 'r'
+                elif dir=='l':
+                    fixdir='r'
+                    print(fixdir)
                     bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
+                m_buffer = m_buffer[4:]
 
 if __name__ == "__main__":
     main()
