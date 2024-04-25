@@ -14,7 +14,6 @@ def main():
     operations = ag.get_total_operations()
     preview = ag.get_best_route()
     m_buffer = bytes()
-    route, num = 0, 0
 
     log = logging.getLogger("scoreboard")
     logging.basicConfig(level=logging.DEBUG)
@@ -49,8 +48,6 @@ def main():
                 score, time_remaining = scoreboard.add_UID(uid[2:])
                 current_score = scoreboard.get_current_score()
                 log.info(f"Current score: {current_score}")
-                num = 0
-                route += 1
                 m_buffer = m_buffer[8:]
                 print(uid)
 

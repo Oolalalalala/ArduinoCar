@@ -6,11 +6,11 @@
 #define CAR_SPEED 255
 
 // The final ratio that is multiplied on to the calculate speed
-#define CAR_LEFT_WHEEL_SPEED_RATIO 0.86f    // <= 1
+#define CAR_LEFT_WHEEL_SPEED_RATIO 0.87f    // <= 1
 #define CAR_RIGHT_WHEEL_SPEED_RATIO 1       // <= 1
 
 // The reverse used in TestRFIDState
-#define CAR_REVERSE_LEFT_WHEEL_SPEED_RATIO 0.8f
+#define CAR_REVERSE_LEFT_WHEEL_SPEED_RATIO 0.95f
 #define CAR_REVERSE_RIGHT_WHEEL_SPEED_RATIO 1
 
 // In order to prevent detection of the corner of a node, a delay is added after car leaves a node
