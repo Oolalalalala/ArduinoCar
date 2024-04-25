@@ -101,11 +101,11 @@ class Map():
     
     def path_to_operation_basic(self, path: deque, starting: bool = False, direction: int = None) -> tuple:
         
-        f_time = 2.4
-        l_time = 0.38
-        l2_time = 0.64
-        r_time = 0.38
-        i_time = 1.8
+        f_time = 0.55
+        l_time = 0.35
+        l2_time = 0.60
+        r_time = 0.35
+        i_time = 1 + 0.05
         
         if len(path) == 1:
             return ('', 0)
@@ -123,7 +123,7 @@ class Map():
         direction = self.nodes[path[0] - 1].get_direction(self.nodes[path[1] - 1]) if direction is None else direction
         if not starting:
             direction = turn_left(turn_left(direction))        
-        operations = 'f' if starting else ''
+        operations = 's' if starting else ''
         ETA = 0
         
         #[0, 1, 2, 3] = [North, South, West, East]
@@ -131,19 +131,19 @@ class Map():
             next_direction = self.nodes[path[i] - 1].get_direction(self.nodes[path[i + 1] - 1])
             
             if direction == next_direction:
-                operations += 'f'
+                operations += 's'
                 ETA += f_time
             elif (direction, next_direction) in [(0, 1), (1, 0), (2, 3), (3, 2)]:
                 if self.nodes[path[i] - 1].neighbors[turn_left(direction)] is None:
-                    operations += 'Lf'
+                    operations += 'us'
                 else:
-                    operations += 'llf'
+                    operations += 'lls'
                 ETA += l2_time + f_time    
             elif (direction, next_direction) in [(0, 2), (2, 1), (1, 3), (3, 0)]:
-                operations += 'lf'
+                operations += 'Ls' if operations else 'ls'
                 ETA += l_time + f_time
             elif (direction, next_direction) in [(0, 3), (3, 1), (1, 2), (2, 0)]:
-                operations += 'rf'
+                operations += 'Rs' if operations else 'rs'
                 ETA += r_time + f_time
             direction = next_direction
         

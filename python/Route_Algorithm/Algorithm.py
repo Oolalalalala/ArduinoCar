@@ -78,6 +78,9 @@ def calculate_limited():
                 if route_score > best_limited_score:
                     best_limited_route = route
                     best_limited_score = route_score
+                elif route_score == best_limited_score and route[1] < best_limited_route[1]:
+                    best_limited_route = route
+                    best_limited_score = route_score
     
     global best_limited_operations
     best_limited_operations = deque(paths_from_start[best_limited_route[0][0]][1])
@@ -99,7 +102,7 @@ def get_best_route():
 def get_best_ETA_total():
     if not calculated:
         calcultate()
-    return best_ETA_total
+    return best_ETA_total - 0.55
 
 def get_best_score():
     return sum([point.score for point in maze.score_points])
@@ -117,7 +120,7 @@ def get_limit_route():
 def get_limited_ETA_total():
     if not limited_calculated:
         calculate_limited()
-    return best_limited_route[1]
+    return best_limited_route[1] - 0.55
 
 def get_limited_score():
     if not limited_calculated:

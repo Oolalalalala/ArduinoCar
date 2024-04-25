@@ -34,7 +34,7 @@ def main():
             print(m_buffer)
             if m_buffer[1] == 1:
                 dir = operations.popleft()
-                outdir = "l" if dir == "L" else dir
+                outdir = "l" if dir == "u" else dir
                 print(outdir)
                 bti1.bt.serial_write_bytes(outdir.encode("utf-8"))
                 m_buffer = m_buffer[4:]
@@ -50,15 +50,15 @@ def main():
 
             elif m_buffer[1] == 3:
                 if dir=='r':
-                    fixdir='l'
+                    fixdir='L'
                     print(fixdir)
                     bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
-                elif dir=='L' or (dir=='l' and operations[0]=='l'):
+                elif dir=='u' or (dir=='l' and operations[0]=='l'):
                     fixdir = operations.popleft()
                     print(fixdir)
                     bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
                 elif dir=='l':
-                    fixdir='r'
+                    fixdir='R'
                     print(fixdir)
                     bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
                 m_buffer = m_buffer[4:]
