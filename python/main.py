@@ -1,7 +1,5 @@
 import Bluetooth.BTInterface as bti
 from Route_Algorithm import Algorithm as ag
-#from score import*
-#import time
 import logging
 import score as sc
 from collections import deque
@@ -39,7 +37,6 @@ def main():
                 outdir = "l" if dir == "L" else dir
                 print(outdir)
                 bti1.bt.serial_write_bytes(outdir.encode("utf-8"))
-                num += 1
                 m_buffer = m_buffer[4:]
                 print("Next State")
             elif m_buffer[1] == 2:
