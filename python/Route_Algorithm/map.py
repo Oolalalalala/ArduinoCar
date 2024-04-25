@@ -135,7 +135,7 @@ class Map():
                 ETA += f_time
             elif (direction, next_direction) in [(0, 1), (1, 0), (2, 3), (3, 2)]:
                 if self.nodes[path[i] - 1].neighbors[turn_left(direction)] is None:
-                    operations += 'lf'
+                    operations += 'Lf'
                 else:
                     operations += 'llf'
                 ETA += l2_time + f_time    
