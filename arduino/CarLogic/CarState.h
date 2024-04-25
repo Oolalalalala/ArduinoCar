@@ -36,6 +36,7 @@ public:
 private:
   float m_DelayTimer;
   bool m_OnNode;
+  bool m_ExitNode;
 };
 
 class TestRFIDState : public CarState
@@ -45,9 +46,24 @@ public:
   virtual void OnStateUpdate(float dt) override;
   virtual void OnStateExit() override;
 
+  void ReturnSequence(float dt);
+  void AbortSequence(float dt);
+
 private:
   bool m_ReturnedNode;
   bool m_RFIDDetected;
+  float m_ExitDelayTimer;
+  bool m_ExitNode;
+
+  bool m_Aborted;
+  int m_AbortStage;
+
+  // Variable for abort
+  bool m_AbortLeftNode;
+  bool m_AbortOnNode;
+  float m_AbortEnterNodeImmunityTimer;
+  bool m_AbortExitNode;
+  float m_AbortExitDelayTimer;
 };
 
 class RotateLeftState : public CarState

@@ -89,3 +89,14 @@ void CarStateMachine::OnUpdate(float dt)
     m_BufferedCommand = CarCommand::None;
   }
 }
+
+void CarStateMachine::DiscardNextCommand()
+{
+  while (m_BufferedCommand == CarCommand::None)
+  {
+    if (Bluetooth::AvailableStateMessageCount())
+      m_BufferedCommand = Bluetooth::ReadStateMessage();
+  }
+
+  m_BufferedCommand = CarCommand::None;
+}

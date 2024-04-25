@@ -15,6 +15,7 @@ public:
 
   // Mark the current state as finished, a new state will be grabbed from bluetooth
   void NextState();
+  void DiscardNextCommand(); // May block is next command has not arrive
 
 private:
   CarState* m_State;

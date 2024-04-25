@@ -6,17 +6,9 @@
 #include "RFID.h"
 #include "Config.h"
 
-void ForwardState::OnStateEnter()
-{
-  m_DelayTimer = 0.0f;
-  m_OnNode = false;
-  Serial.println("Forward state begin");
-}
-
-void ForwardState::OnStateUpdate(float dt)
+static void CalculatePathTraceSpeed(float& leftWheelSpeed, float& rightWheelSpeed)
 {
   float offset = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT) * CAR_SPEED * CAR_PATH_TRACE_ADJUST_STRENGTH;
-  float leftWheelSpeed, rightWheelSpeed;
 
   if (offset > 0)
   {
@@ -28,12 +20,23 @@ void ForwardState::OnStateUpdate(float dt)
     rightWheelSpeed = CAR_SPEED;
     leftWheelSpeed = CAR_SPEED + offset;
   }
+}
 
+void ForwardState::OnStateEnter()
+{
+  m_DelayTimer = 0.0f;
+  m_OnNode = false;
+  m_ExitNode = false;
+  Serial.println("Forward state begin");
+}
+
+void ForwardState::OnStateUpdate(float dt)
+{
+  float leftWheelSpeed, rightWheelSpeed;
+  CalculatePathTraceSpeed(leftWheelSpeed, rightWheelSpeed);
   CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
 
-
   // Enters the node
-  if (InferredSensorArray::GetDetectionCount() == 5)
   if (InferredSensorArray::GetDetectionCount() == 5)
   {
     m_OnNode = true;
@@ -41,7 +44,7 @@ void ForwardState::OnStateUpdate(float dt)
   if (m_OnNode)
   {
     m_DelayTimer += dt;
-    if (m_DelayTimer >= CAR_FORWARD_ENTER_NODE_IMMUNITY_TIME && InferredSensorArray::GetDetectionCount() < 5)
+    if (m_DelayTimer >= CAR_FORWARD_ENTER_NODE_IMMUNITY_TIME && InferredSensorArray::GetDetectionCount() <= 3)
     {
       m_DelayTimer = 0.0f;
       m_OnNode = false;
@@ -65,71 +68,137 @@ void TestRFIDState::OnStateEnter()
 {
   m_ReturnedNode = false;
   m_RFIDDetected = false;
+  m_ExitDelayTimer = 0.0f;
+  m_ExitNode = false;
+  m_Aborted = false;
+
+  // Abort use variable
+  m_AbortLeftNode = false;
+  m_AbortEnterNodeImmunityTimer = 0.0f;
+  m_AbortExitNode = false;
+  m_AbortExitDelayTimer = 0.0f;
 
   Serial.println("TestRFID state begin");
 }
 
 void TestRFIDState::OnStateUpdate(float dt)
 {
-  if (!m_RFIDDetected)
+  if (m_Aborted)
   {
-    float offset = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT) * CAR_SPEED * CAR_PATH_TRACE_ADJUST_STRENGTH;
-    float leftWheelSpeed, rightWheelSpeed;
+    AbortSequence(dt);
+    return;
+  }
 
-    if (offset > 0)
+  if (m_RFIDDetected)
+  {
+    ReturnSequence(dt);
+    return;
+  }
+
+  // Main sequence
+  float leftWheelSpeed, rightWheelSpeed;
+  CalculatePathTraceSpeed(leftWheelSpeed, rightWheelSpeed);
+  CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
+
+  // ACCIDENT: RFID not detected
+  if (InferredSensorArray::GetDetectionCount() == 5)
+  {
+    m_Aborted = true;
+    m_AbortStage = 0;
+    Bluetooth::SendMessage(3, nullptr, 0);
+    m_StateMachine->DiscardNextCommand();
+    Serial.println("ACCIDENT: RFID not detected.");
+  }
+
+  // RFID detection
+  if (RFID::HasValue())
+  {
+    uint32_t uid = RFID::ReadValue();
+    Bluetooth::SendMessage(2, &uid, 4);
+
+    m_RFIDDetected = true;
+  }
+}
+
+void TestRFIDState::ReturnSequence(float dt)
+{
+  if (InferredSensorArray::GetDetectionCount() == 5)
+    m_ReturnedNode = true;
+  if (m_ReturnedNode && InferredSensorArray::GetDetectionCount() <= 3)
+    m_ExitNode = true;
+  if (m_ExitNode)
+  {
+    m_ExitDelayTimer += dt;
+    if (m_ExitDelayTimer >= CAR_RFID_EXIT_STATE_DEALY)
+      m_StateMachine->NextState();
+  }
+
+  if (m_ReturnedNode)
+    CarMotor::SetSpeed(CAR_SPEED * CAR_LEFT_WHEEL_SPEED_RATIO, CAR_SPEED * CAR_RIGHT_WHEEL_SPEED_RATIO);
+  else
+    CarMotor::SetSpeed(-CAR_SPEED * CAR_REVERSE_LEFT_WHEEL_SPEED_RATIO, -CAR_SPEED * CAR_REVERSE_RIGHT_WHEEL_SPEED_RATIO);
+}
+
+void TestRFIDState::AbortSequence(float dt)
+{
+  switch (m_AbortStage)
+  {
+    case 0: // Turn left
     {
-      leftWheelSpeed = CAR_SPEED;
-      rightWheelSpeed = CAR_SPEED - offset;
+      if (InferredSensorArray::GetDetectionCount() == 0)
+        m_AbortLeftNode = true;
+
+      if (m_AbortLeftNode && InferredSensorArray::GetDetectionCount())
+        m_AbortStage++;
+
+      CarMotor::SetSpeed(255, -255);
+
+      break;
     }
-    else
+
+    case 1: // Go forward
     {
-      rightWheelSpeed = CAR_SPEED;
-      leftWheelSpeed = CAR_SPEED + offset;
-    }
+      float leftWheelSpeed, rightWheelSpeed;
+      CalculatePathTraceSpeed(leftWheelSpeed, rightWheelSpeed);
+      CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
 
-    CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
+      if (InferredSensorArray::GetDetectionCount() == 5)
+        m_AbortOnNode = true;
 
-    // TODO: Deal with cases when RFID is not found
-    // ERROR: RFID not detected
-    if (InferredSensorArray::GetDetectionCount() == 5)
-    {
-      Serial.println("RFID not detected");
-      delay(1000);
-    }
+      if (m_AbortOnNode)
+      {
+        m_AbortEnterNodeImmunityTimer += dt;
 
-    // RFID detection
-    if (RFID::HasValue())
-    {
-      uint32_t uid = RFID::ReadValue();
-      Bluetooth::SendMessage(2, &uid, 4);
+        if (m_AbortEnterNodeImmunityTimer >= CAR_FORWARD_ENTER_NODE_IMMUNITY_TIME && InferredSensorArray::GetDetectionCount() <= 3)
+        {
+          m_AbortOnNode = false;
+          m_AbortExitNode = true;
+        }
+      }
 
-      m_RFIDDetected = true;
+      if (m_AbortExitNode)
+      {
+        m_AbortExitDelayTimer += dt;
+        if (m_AbortExitDelayTimer >= CAR_FORWARD_EXIT_STATE_DELAY)
+          m_StateMachine->NextState();
+      }
+
+      break;
     }
   }
-  else
+  
+  // RFID detection
+  if (RFID::HasValue())
   {
-    if (InferredSensorArray::GetDetectionCount() == 5)
-    if (InferredSensorArray::GetDetectionCount() == 5)
-      m_ReturnedNode = true;
-    if (m_ReturnedNode && InferredSensorArray::GetDetectionCount() <= 4)
-      m_ExitNode = true;
-    if (m_ExitNode)
-    {
-      m_ExitDelayTimer += dt;
-      if (m_ExitDelayTimer > CAR_RFID_EXIT_STATE_DEALY)
-        m_StateMachine->NextState();
-    }
+    uint32_t uid = RFID::ReadValue();
+    Bluetooth::SendMessage(2, &uid, 4);
 
-    if (m_ReturnedNode)
-      CarMotor::SetSpeed(CAR_SPEED * CAR_LEFT_WHEEL_SPEED_RATIO, CAR_SPEED * CAR_RIGHT_WHEEL_SPEED_RATIO);
-    else
-      CarMotor::SetSpeed(-CAR_SPEED * CAR_REVERSE_LEFT_WHEEL_SPEED_RATIO, -CAR_SPEED * CAR_REVERSE_RIGHT_WHEEL_SPEED_RATIO);
+    m_RFIDDetected = true;
   }
 }
 
 void TestRFIDState::OnStateExit()
 {
-
   Serial.println("TestRFID state end");
 }
 

@@ -34,7 +34,13 @@ int Bluetooth::AvailableStateMessageCount()
 
 CarCommand Bluetooth::ReadStateMessage()
 {
-  uint8_t value = Serial1.read();
+  char value = Serial1.read();
 
-  return (CarCommand)value;
+  switch (value)
+  {
+    case 'f': return CarCommand::Forward;
+    case 'l': return CarCommand::RotateLeft;
+    case 'r': return CarCommand::RotateRight;
+    case 'i': return CarCommand::TestRFID;
+  }
 }
