@@ -16,10 +16,10 @@ def to_power(i: int) -> set:
     return result
 
 def calcultate():
-    raw_map = read_csv('python\\Route_Algorithm\\mazesmall.csv')
+    raw_map = read_csv('python\\Route_Algorithm\\medium_maze.csv')
     
     global maze, SP_num
-    maze = Map(raw_map, 3, 3, starting_point_index = 6)
+    maze = Map(raw_map, 3, 4, starting_point_index = 1)
     SP_num = len(maze.score_points)
 
     #Held-Karp Algorithm
@@ -78,6 +78,9 @@ def calculate_limited():
                 if route_score > best_limited_score:
                     best_limited_route = route
                     best_limited_score = route_score
+                elif route_score == best_limited_score and route[1] < best_limited_route[1]:
+                    best_limited_route = route
+                    best_limited_score = route_score
     
     global best_limited_operations
     best_limited_operations = deque(paths_from_start[best_limited_route[0][0]][1])
@@ -99,7 +102,7 @@ def get_best_route():
 def get_best_ETA_total():
     if not calculated:
         calcultate()
-    return best_ETA_total
+    return best_ETA_total - 0.55
 
 def get_best_score():
     return sum([point.score for point in maze.score_points])
@@ -117,7 +120,7 @@ def get_limit_route():
 def get_limited_ETA_total():
     if not limited_calculated:
         calculate_limited()
-    return best_limited_route[1]
+    return best_limited_route[1] - 0.55
 
 def get_limited_score():
     if not limited_calculated:
