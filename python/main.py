@@ -39,7 +39,6 @@ def main():
                 outdir = "l" if dir == "u" else dir
                 print(outdir)
                 bti1.bt.serial_write_bytes(outdir.encode("utf-8"))
-                num += 1
                 m_buffer = m_buffer[4:]
                 print("Next State")
             elif m_buffer[1] == 2:
