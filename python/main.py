@@ -4,13 +4,15 @@ from Route_Algorithm import Algorithm as ag
 #import time
 import logging
 import score as sc
+from collections import deque
     
 
 def main():
     bti1 = bti.BTInterface()
     bti1.start()
     
-    operations = ag.get_total_operations()
+    # operations = ag.get_total_operations()
+    operations = deque(["i", "r", "i", "r", "i", "r", "i"])
     preview = ag.get_best_route()
     m_buffer = bytes()
     route, num = 0, 0
@@ -18,7 +20,7 @@ def main():
     log = logging.getLogger("scoreboard")
     logging.basicConfig(level=logging.DEBUG)
 
-    scoreboard=sc.ScoreboardServer("ggggggggggggg", host=f"http://140.112.175.18:5000")#dfghjk,lmnbvcdtyikl,mnb
+    scoreboard=sc.ScoreboardServer("Team 7", host=f"http://140.112.175.18:5000")
     score, time_remaining = scoreboard.add_UID("00000000")
     while time_remaining>80.5:
         score, time_remaining = scoreboard.add_UID("00000000")
