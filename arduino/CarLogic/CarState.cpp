@@ -6,21 +6,21 @@
 #include "RFID.h"
 #include "Config.h"
 
-static void CalculatePathTraceSpeed(float& leftWheelSpeed, float& rightWheelSpeed)
-{
-  float offset = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT) * CAR_SPEED * CAR_PATH_TRACE_ADJUST_STRENGTH;
-
-  if (offset > 0)
-  {
-    leftWheelSpeed = CAR_SPEED;
-    rightWheelSpeed = CAR_SPEED - offset;
-  }
-  else
-  {
-    rightWheelSpeed = CAR_SPEED;
-    leftWheelSpeed = CAR_SPEED + offset;
-  }
-}
+//static void CalculatePathTraceSpeed(float& leftWheelSpeed, float& rightWheelSpeed)
+//{
+//  float offset = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT) * CAR_SPEED * CAR_PATH_TRACE_ADJUST_STRENGTH;
+//
+//  if (offset > 0)
+//  {
+//    leftWheelSpeed = CAR_SPEED;
+//    rightWheelSpeed = CAR_SPEED - offset;
+//  }
+//  else
+//  {
+//    rightWheelSpeed = CAR_SPEED;
+//    leftWheelSpeed = CAR_SPEED + offset;
+//  }
+//}
 
 void ForwardState::OnStateEnter()
 {
@@ -33,7 +33,8 @@ void ForwardState::OnStateEnter()
 void ForwardState::OnStateUpdate(float dt)
 {
   float leftWheelSpeed, rightWheelSpeed;
-  CalculatePathTraceSpeed(leftWheelSpeed, rightWheelSpeed);
+  m_Controller.OnUpdate(dt);
+  m_Controller.GetSpeed(leftWheelSpeed, rightWheelSpeed);
   CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
 
   // Enters the node
@@ -97,7 +98,8 @@ void TestRFIDState::OnStateUpdate(float dt)
 
   // Main sequence
   float leftWheelSpeed, rightWheelSpeed;
-  CalculatePathTraceSpeed(leftWheelSpeed, rightWheelSpeed);
+  m_Controller.OnUpdate(dt);
+  m_Controller.GetSpeed(leftWheelSpeed, rightWheelSpeed);
   CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
 
   // ACCIDENT: RFID not detected
@@ -105,6 +107,7 @@ void TestRFIDState::OnStateUpdate(float dt)
   {
     m_Aborted = true;
     m_AbortStage = 0;
+    m_Controller.Reset();
     Bluetooth::SendMessage(3, nullptr, 0);
     m_StateMachine->DiscardNextCommand();
     Serial.println("ACCIDENT: RFID not detected.");
@@ -143,7 +146,7 @@ void TestRFIDState::AbortSequence(float dt)
 {
   switch (m_AbortStage)
   {
-    case 0: // Turn left
+    case 0: // Turn RIght
     {
       if (InferredSensorArray::GetDetectionCount() == 0)
         m_AbortLeftNode = true;
@@ -151,7 +154,7 @@ void TestRFIDState::AbortSequence(float dt)
       if (m_AbortLeftNode && InferredSensorArray::GetDetectionCount())
         m_AbortStage++;
 
-      CarMotor::SetSpeed(255, -255);
+      CarMotor::SetSpeed(CAR_SPEED, -CAR_SPEED);
 
       break;
     }
@@ -159,7 +162,8 @@ void TestRFIDState::AbortSequence(float dt)
     case 1: // Go forward
     {
       float leftWheelSpeed, rightWheelSpeed;
-      CalculatePathTraceSpeed(leftWheelSpeed, rightWheelSpeed);
+      m_Controller.OnUpdate(dt);
+      m_Controller.GetSpeed(leftWheelSpeed, rightWheelSpeed);
       CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
 
       if (InferredSensorArray::GetDetectionCount() == 5)
@@ -221,7 +225,6 @@ void RotateLeftState::OnStateUpdate(float dt)
 
 void RotateLeftState::OnStateExit()
 {
-
   Serial.println("Turn left state end");
 }
 
@@ -243,6 +246,125 @@ void RotateRightState::OnStateUpdate(float dt)
 }
 
 void RotateRightState::OnStateExit()
+{
+  Serial.println("Turn right state end");
+}
+
+void SprintState::OnStateEnter()
+{
+  m_LeftNode = false;
+  m_OnNode = false;
+  m_ImmunityTimer = 0.0f;
+  m_BrakeTimer = 0.0f;
+  
+  Serial.println("Sprint state begin");
+}
+
+void SprintState::OnStateUpdate(float dt)
+{
+  m_ImmunityTimer += dt;
+  
+  float leftWheelSpeed, rightWheelSpeed;
+  m_Controller.OnUpdate(dt);
+  m_Controller.GetSpeed(leftWheelSpeed, rightWheelSpeed);
+  CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
+
+  if (InferredSensorArray::GetDetectionCount() <= 3)
+    m_LeftNode = true;
+
+  if (m_LeftNode && m_ImmunityTimer >= CAR_SPRINT_STATE_IMMUNITY_TIME && InferredSensorArray::GetDetectionCount() == 5)
+    m_OnNode = true;
+
+  if (m_OnNode)
+  {
+    m_BrakeTimer += dt;
+
+    CarMotor::SetSpeed(-CAR_SPRINT_STATE_BRAKE_SPEED * CAR_REVERSE_LEFT_WHEEL_SPEED_RATIO, -CAR_SPRINT_STATE_BRAKE_SPEED * CAR_REVERSE_RIGHT_WHEEL_SPEED_RATIO);
+
+    if (m_BrakeTimer >= CAR_SPRINT_STATE_BRAKE_TIME)
+      m_StateMachine->NextState();
+  }
+}
+
+void SprintState::OnStateExit()
+{
+  Serial.println("Sprint state end");
+}
+
+void TurnLeftState::OnStateEnter()
+{
+  m_ImmunityTimer = 0.0f;
+  m_BrakeTimer = 0.0f;
+  m_Exit = false;
+  m_TwoBlobs = false;
+  Serial.println("Turn left state begin");
+}
+
+void TurnLeftState::OnStateUpdate(float dt)
+{
+  m_ImmunityTimer += dt;
+
+  // Special case: Two blobs -> One blob
+  if (InferredSensorArray::GetDetectionBlobCount() == 2)
+    m_TwoBlobs = true;
+  if (m_TwoBlobs && InferredSensorArray::GetDetectionBlobCount() == 1)
+    m_Exit = true;
+
+  if (InferredSensorArray::GetDetectionCount() <= 3 && InferredSensorArray::GetState(0) && InferredSensorArray::GetDetectionBlobCount() == 1 && m_ImmunityTimer >= CAR_TURN_STATE_IMMUNITY_TIME)
+    m_Exit = true;
+
+  if (m_Exit)
+  {
+    m_BrakeTimer += dt;
+    CarMotor::SetSpeed(CAR_TURN_RIGHT_SPEED);
+
+    if (m_BrakeTimer >= CAR_TURN_BRAKE_TIME)
+      m_StateMachine->NextState();
+  }
+  else
+    CarMotor::SetSpeed(CAR_TURN_LEFT_SPEED);
+}
+
+void TurnLeftState::OnStateExit()
+{
+  Serial.println("Turn left state end");
+}
+
+void TurnRightState::OnStateEnter()
+{
+  m_ImmunityTimer = 0.0f;
+  m_BrakeTimer = 0.0f;
+  m_Exit = false;
+  m_TwoBlobs = false;
+  Serial.println("Turn right state begin");
+}
+
+void TurnRightState::OnStateUpdate(float dt)
+{
+  m_ImmunityTimer += dt;
+
+  
+  if (InferredSensorArray::GetDetectionBlobCount() == 2)
+    m_TwoBlobs = true;
+  if (m_TwoBlobs && InferredSensorArray::GetDetectionBlobCount() == 1)
+    m_Exit = true;
+
+  if (InferredSensorArray::GetDetectionCount() <= 3 && InferredSensorArray::GetState(4) && InferredSensorArray::GetDetectionBlobCount() == 1 && m_ImmunityTimer >= CAR_TURN_STATE_IMMUNITY_TIME)
+    m_Exit = true;
+
+  if (m_Exit)
+  {
+    m_BrakeTimer += dt;
+    CarMotor::SetSpeed(CAR_TURN_LEFT_SPEED);
+
+    if (m_BrakeTimer >= CAR_TURN_BRAKE_TIME)
+      m_StateMachine->NextState();
+  }
+  else
+    CarMotor::SetSpeed(CAR_TURN_RIGHT_SPEED);
+}
+
+void TurnRightState::OnStateExit()
 {
   Serial.println("Turn right state end");
 }
