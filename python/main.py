@@ -4,6 +4,7 @@ from Route_Algorithm import Algorithm as ag
 #import time
 import logging
 import score as sc
+from collections import deque
     
 
 def main():
