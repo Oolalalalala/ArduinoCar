@@ -16,10 +16,10 @@ def to_power(i: int) -> set:
     return result
 
 def calcultate():
-    raw_map = read_csv('python\\Route_Algorithm\\mazesmall.csv')
+    raw_map = read_csv('python\\Route_Algorithm\\medium_maze.csv')
     
     global maze, SP_num
-    maze = Map(raw_map, 3, 3, starting_point_index = 6)
+    maze = Map(raw_map, 3, 4, starting_point_index = 1)
     SP_num = len(maze.score_points)
 
     #Held-Karp Algorithm
