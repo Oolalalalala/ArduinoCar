@@ -1,13 +1,27 @@
 import Bluetooth.BTInterface as bti
 from Route_Algorithm import Algorithm as ag
+#from score import*
+#import time
+import logging
+import score as sc
+    
 
 def main():
     bti1 = bti.BTInterface()
     bti1.start()
+    
     operations = ag.get_total_operations()
     preview = ag.get_best_route()
     m_buffer = bytes()
     route, num = 0, 0
+
+    log = logging.getLogger("scoreboard")
+    logging.basicConfig(level=logging.DEBUG)
+
+    scoreboard=sc.ScoreboardServer("ggggggggggggg", host=f"http://140.112.175.18:5000")#dfghjk,lmnbvcdtyikl,mnb
+    score, time_remaining = scoreboard.add_UID("00000000")
+    while time_remaining>80.5:
+        score, time_remaining = scoreboard.add_UID("00000000")
 
     print(preview)
     print(operations)
@@ -29,6 +43,11 @@ def main():
                 print("Next State")
             elif m_buffer[1] == 2:
                 uid = hex(int.from_bytes(m_buffer[3:7], byteorder="little", signed=False))
+                print(uid)
+                score, time_remaining = scoreboard.add_UID(uid[2:])
+                current_score = scoreboard.get_current_score()
+                log.info(f"Current score: {current_score}")
+                
                 num = 0
                 route += 1
                 m_buffer = m_buffer[8:]
