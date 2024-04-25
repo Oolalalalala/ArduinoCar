@@ -22,5 +22,5 @@ if __name__ == "__main__":
         msgWrite = input()
         if msgWrite == "exit":
             sys.exit()
-        if '0' <= msgWrite[0] and msgWrite[0] <= '9':
-            bt.write(chr(ord(msgWrite[0]) - ord('0')))
+        bt.write(msgWrite)
+

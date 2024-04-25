@@ -34,6 +34,7 @@ public:
   virtual void OnStateExit() override;
 
 private:
+  float m_DelayTimer;
   bool m_OnNode;
 };
 

@@ -66,6 +66,7 @@ void CarStateMachine::OnUpdate(float dt)
   if (m_StateEnded)
   {
     m_State->OnStateExit();
+    Serial.println(m_DebugTimer.Tick());
     delete m_State;
     m_State = nullptr;
     m_StateEnded = false;

@@ -2,6 +2,7 @@
 #define STATE_MACHINE_H
 
 #include "CarState.h"
+#include "BasicControl.h" 
 
 class CarStateMachine
 {
@@ -20,6 +21,8 @@ private:
   bool m_StateEnded = false;
 
   CarCommand m_BufferedCommand;
+
+  Timer m_DebugTimer;
 };
 
 #endif
