@@ -27,6 +27,7 @@ public:
   void Reset();
   void OnUpdate(float dt);
   void GetSpeed(float& leftWheelSpeed, float& rightWheelSpeed);
+  void GetBackSpeed(float& leftWheelSpeed, float& rightWheelSpeed);
 
 private:
   float m_ErrorDataPoints[20];
