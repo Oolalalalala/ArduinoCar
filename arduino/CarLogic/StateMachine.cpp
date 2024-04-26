@@ -15,6 +15,12 @@ static CarState* CreateCarState(CarCommand command)
     return new RotateRightState();
   case CarCommand::TestRFID:
     return new TestRFIDState();
+  case CarCommand::SprintState:
+    return new SprintState();
+  case CarCommand::TurnLeftState:
+    return new TurnLeftState();
+  case CarCommand::TurnRightState:
+    return new TurnRightState();
   }
 
   Serial.println("Error: Invalid CarCommand");

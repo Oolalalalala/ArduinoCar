@@ -35,12 +35,19 @@ int Bluetooth::AvailableStateMessageCount()
 CarCommand Bluetooth::ReadStateMessage()
 {
   char value = Serial1.read();
-
+  Serial.println(value);
   switch (value)
   {
     case 'f': return CarCommand::Forward;
     case 'l': return CarCommand::RotateLeft;
     case 'r': return CarCommand::RotateRight;
     case 'i': return CarCommand::TestRFID;
+    case 's': return CarCommand::SprintState;
+    case 'L': return CarCommand::TurnLeftState;
+    case 'R': return CarCommand::TurnRightState;
   }
+
+  Serial.println("Error: Unknown CarCommand from bluetooth");
+
+  return CarCommand::None;
 }

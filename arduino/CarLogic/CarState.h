@@ -1,10 +1,11 @@
 #ifndef CAR_STATE_H
 #define CAR_STATE_H
 
+#include "BasicControl.h"
 
 enum class CarCommand : unsigned char
 {
-    None = 0, Forward = 1, RotateLeft = 2, RotateRight = 3, TestRFID = 4
+    None = 0, Forward = 1, RotateLeft = 2, RotateRight = 3, TestRFID = 4, SprintState = 5, TurnLeftState = 6, TurnRightState = 7
 };
 
 // Forward declaration
@@ -34,6 +35,8 @@ public:
   virtual void OnStateExit() override;
 
 private:
+  PIDController m_Controller;
+
   float m_DelayTimer;
   bool m_OnNode;
   bool m_ExitNode;
@@ -50,6 +53,8 @@ public:
   void AbortSequence(float dt);
 
 private:
+  PIDController m_Controller;
+
   bool m_ReturnedNode;
   bool m_RFIDDetected;
   float m_ExitDelayTimer;
@@ -87,6 +92,53 @@ public:
 
 private:
   bool leftRoute;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+// Extreme operations
+
+class SprintState : public CarState
+{
+public:
+  virtual void OnStateEnter() override;
+  virtual void OnStateUpdate(float dt) override;
+  virtual void OnStateExit() override;
+
+private:
+  PIDController m_Controller;
+
+  bool m_LeftNode;
+  float m_ImmunityTimer;
+  bool m_OnNode;
+  float m_BrakeTimer;
+};
+
+class TurnLeftState : public CarState
+{
+public:
+  virtual void OnStateEnter() override;
+  virtual void OnStateUpdate(float dt) override;
+  virtual void OnStateExit() override;
+
+private:
+  float m_ImmunityTimer;
+  float m_BrakeTimer;
+  bool m_Exit;
+  bool m_TwoBlobs;
+};
+
+class TurnRightState : public CarState
+{
+public:
+  virtual void OnStateEnter() override;
+  virtual void OnStateUpdate(float dt) override;
+  virtual void OnStateExit() override;
+  
+private:
+  float m_ImmunityTimer;
+  float m_BrakeTimer;
+  bool m_Exit;
+  bool m_TwoBlobs;
 };
 
 #endif

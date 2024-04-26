@@ -1,127 +1,217 @@
-int PWMA = 11;
-int PWMB = 12;
-int AIN1 = 2;
-int AIN2 = 3;
-int BIN1 = 5;
-int BIN2 = 6;
-int speed = 255;
-float adjustConstant = speed / 5;
+#include "BasicControl.h"
 
-enum class CarState
+#define IFA InferredSensorArray
+
+
+//   +--(FL)--C--(FR)--+
+//   |                 |
+//   |                 |
+//   |                 |
+//   |                 |
+//   |                 |
+//   +-(BL)-AB-DE-(BR)-+
+
+enum class RelPos
 {
-  None = 0, Forward, RotateLeft1, RotateLeft2, RotateRight1, RotateRight2
+  None = 0, A_C, B_C, D_C, E_C, Perfect, C_BL, C_BR, FL_BL, FR_BR, FL_A, FL_B, FL_D, FL_E, FR_A, FR_B, FR_D, FR_E
 };
 
-CarState currentState = CarState::Forward;
 
-void setup() {
-    pinMode(PWMA, OUTPUT);
-    pinMode(PWMB, OUTPUT);
-    pinMode(AIN1, OUTPUT);
-    pinMode(AIN2, OUTPUT);
-    pinMode(BIN1, OUTPUT);
-    pinMode(BIN2, OUTPUT);
-    Serial.begin(9600);
+RelPos relPos = RelPos::None;
+
+float Function
+
+
+void setup() 
+{
+  IFA::Initialize();
+
+  int a = IFA::GetState(0);
+  int b = IFA::GetState(1);
+  int c = IFA::GetState(2); // The back one
+  int d = IFA::GetState(3);
+  int e = IFA::GetState(4);
+
+  if (c)
+  {
+    if      (a) relPos = RelPos::A_C;
+    else if (b) relPos = RelPos::B_C;
+    else if (d) relPos = RelPos::D_C;
+    else if (e) relPos = RelPos::E_C;
+  }
 }
 
-
-
-void MoveWheel(int leftSpeed, int rightSpeed)
+void loop()
 {
-  if (leftSpeed > 0)
+  int a = IFA::GetState(0);
+  int b = IFA::GetState(1);
+  int c = IFA::GetState(2); // The back one
+  int d = IFA::GetState(3);
+  int e = IFA::GetState(4);
+
+  float leftWheelSpeed, rightWheelSpeed;
+
+  if (c)
   {
-    digitalWrite(BIN1, HIGH);
-    digitalWrite(BIN2, LOW);
-    analogWrite(PWMB, leftSpeed);
+    if      (a) relPos = RelPos::A_C;
+    else if (b) relPos = RelPos::B_C;
+    else if (d) relPos = RelPos::D_C;
+    else if (e) relPos = RelPos::E_C;
   }
   else
   {
-    digitalWrite(BIN1, LOW);
-    digitalWrite(BIN2, HIGH);
-    analogWrite(PWMB, -leftSpeed);
+    switch (relPos)
+    {
+      case RelPos::A_C:
+      {
+        if (a == 0)
+        {
+
+        }
+        break;
+      }
+
+      case RelPos::B_C:
+      {
+
+        break;
+      }
+
+      case RelPos::D_C:
+      {
+
+        break;
+      }
+
+      case RelPos::E_C:
+      {
+
+        break;
+      }
+    }
   }
 
-  
-  if (rightSpeed > 0)
+  switch (relPos)
   {
-    digitalWrite(AIN1, LOW);
-    digitalWrite(AIN2, HIGH);
-    analogWrite(PWMA, rightSpeed);
+    case RelPos::A_C:
+    {
+      leftWheelSpeed = 50;
+      rightWheelSpeed = 40;
+      break;
+    }
+
+    case RelPos::B_C:
+    {
+      leftWheelSpeed = 50;
+      rightWheelSpeed = 45;
+      break;
+    }
+
+    case RelPos::D_C:
+    {
+      leftWheelSpeed = 45;
+      rightWheelSpeed = 50;
+      break;
+    }
+
+    case RelPos::E_C:
+    {
+      leftWheelSpeed = 40;
+      rightWheelSpeed = 50;
+      break;
+    }
+
+    case RelPos::Perfect:
+    {
+      leftWheelSpeed = 50;
+      rightWheelSpeed = 50;
+      break;
+    }
+
+    case RelPos::C_BL:
+    {
+      leftWheelSpeed = 55;
+      rightWheelSpeed = 35;
+      break;
+    }
+
+    case RelPos::C_BR:
+    {
+      leftWheelSpeed = 35;
+      rightWheelSpeed = 55;
+      break;
+    }
+
+    case RelPos::FL_BL:
+    {
+      leftWheelSpeed = 0;
+      rightWheelSpeed = 0;
+      break;
+    }
+
+    case RelPos::FR_BR:
+    {
+      leftWheelSpeed = 0;
+      rightWheelSpeed = 0;
+      break;
+    }
+
+    case RelPos::FL_A:
+    {
+      leftWheelSpeed = 0;
+      rightWheelSpeed = 0;
+      break;
+    }
+
+    case RelPos::FL_B:
+    {
+      leftWheelSpeed = 0;
+      rightWheelSpeed = 0;
+      break;
+    }
+
+    case RelPos::FL_D:
+    {
+      leftWheelSpeed = 0;
+      rightWheelSpeed = 0;
+      break;
+    }
+
+    case RelPos::FL_E:
+    {
+      leftWheelSpeed = 0;
+      rightWheelSpeed = 0;
+      break;
+    }
+
+    case RelPos::FR_A:
+    {
+      leftWheelSpeed = 0;
+      rightWheelSpeed = 0;
+      break;
+    }
+
+    case RelPos::FR_B:
+    {
+      leftWheelSpeed = 0;
+      rightWheelSpeed = 0;
+      break;
+    }
+
+    case RelPos::FR_D:
+    {
+      leftWheelSpeed = 0;
+      rightWheelSpeed = 0;
+      break;
+    }
+
+    case RelPos::FR_E:
+    {
+      leftWheelSpeed = 0;
+      rightWheelSpeed = 0;
+      break;
+    }
   }
-  else
-  {
-    digitalWrite(AIN1, HIGH);
-    digitalWrite(AIN2, LOW);
-    analogWrite(PWMA, -rightSpeed);
-  }
-}
 
-int r1, r2, r3, r4, r5;
-
-void ReadPinValue()
-{
-  r1 = digitalRead(32);
-  r2 = digitalRead(34);
-  r3 = digitalRead(36);
-  r4 = digitalRead(38);
-  r5 = digitalRead(40);
-}
-
-int GetOffsetValue()
-{
-  return (r1 * -4 + r2 * -1 + r4 * 1 + r5 * 4) / (r1 + r2 + r3 + r4 + r5);
-}
-
-bool ReachNode()
-{
-  return r1 & r2 & r3 & r4 & r5;
-}
-
-bool MeetRoute()
-{
-  return r1 | r2 | r3 | r4 | r5;
-}
-
-int oldTime = 0, currentTime = 0;
-
-float GetDeltaTime()
-{
-   oldTime = currentTime;
-   currentTime = millis();
-   return 0.001 * (currentTime - oldTime);
-}
-float leftWheelSpeed = 100.0, rightWheelSpeed = 100.0;
-
-bool x = false;
-void loop() 
-{
-  MoveWheel(-220,-255);
-  return;
-
-
-  if (x)
-  MoveWheel(255, 100);
-  else
-  MoveWheel(255,255);
-  x = !x;
-  delay(1000);
-  return;
-  ReadPinValue();
-
-  float offset = GetOffsetValue() * adjustConstant;// * GetDeltaTime();
-  if (offset > 0)
-  {
-    leftWheelSpeed = speed;
-    rightWheelSpeed = speed - offset;
-  }
-  else
-  {
-    rightWheelSpeed = speed;
-    leftWheelSpeed = speed + offset;
-  }
-  leftWheelSpeed *= 0.85;
-  MoveWheel(leftWheelSpeed, rightWheelSpeed);
-
-
-  delay(1);
+  CarMotor::SetSpeed(-rightWheelSpeed, -leftWheelSpeed);
 }
