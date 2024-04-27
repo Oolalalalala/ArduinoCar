@@ -1,217 +1,46 @@
 #include "BasicControl.h"
+#include "Config.h"
 
-#define IFA InferredSensorArray
+#define CAR_RFID_REVERSE_SPEED -150
 
-
-//   +--(FL)--C--(FR)--+
-//   |                 |
-//   |                 |
-//   |                 |
-//   |                 |
-//   |                 |
-//   +-(BL)-AB-DE-(BR)-+
-
-enum class RelPos
-{
-  None = 0, A_C, B_C, D_C, E_C, Perfect, C_BL, C_BR, FL_BL, FR_BR, FL_A, FL_B, FL_D, FL_E, FR_A, FR_B, FR_D, FR_E
-};
-
-
-RelPos relPos = RelPos::None;
-
-float Function
-
-
+float m_ReturnCorrection = 0.0f;
+Timer timer;
 void setup() 
 {
-  IFA::Initialize();
-
-  int a = IFA::GetState(0);
-  int b = IFA::GetState(1);
-  int c = IFA::GetState(2); // The back one
-  int d = IFA::GetState(3);
-  int e = IFA::GetState(4);
-
-  if (c)
-  {
-    if      (a) relPos = RelPos::A_C;
-    else if (b) relPos = RelPos::B_C;
-    else if (d) relPos = RelPos::D_C;
-    else if (e) relPos = RelPos::E_C;
-  }
+  Serial.begin(9600);
+  InferredSensorArray::Initialize();
+  timer.Tick();
 }
+
+int c = 0;
 
 void loop()
 {
-  int a = IFA::GetState(0);
-  int b = IFA::GetState(1);
-  int c = IFA::GetState(2); // The back one
-  int d = IFA::GetState(3);
-  int e = IFA::GetState(4);
+    InferredSensorArray::CollectState();
+    float dt = timer.Tick();
 
-  float leftWheelSpeed, rightWheelSpeed;
+    if (InferredSensorArray::GetState(0) || InferredSensorArray::GetState(1))
+      m_ReturnCorrection = -CAR_RFID_REVERSE_SPEED * -0.3f;
+    if (InferredSensorArray::GetState(3) || InferredSensorArray::GetState(4))
+      m_ReturnCorrection = -CAR_RFID_REVERSE_SPEED * 0.3f;
+    if (c == 0 && InferredSensorArray::GetState(2))
+      m_ReturnCorrection = 0;
 
-  if (c)
-  {
-    if      (a) relPos = RelPos::A_C;
-    else if (b) relPos = RelPos::B_C;
-    else if (d) relPos = RelPos::D_C;
-    else if (e) relPos = RelPos::E_C;
-  }
-  else
-  {
-    switch (relPos)
+    m_ReturnCorrection *= pow(0.2, dt);
+
+    float leftWheelSpeed, rightWheelSpeed;
+    if (m_ReturnCorrection > 0)
     {
-      case RelPos::A_C:
-      {
-        if (a == 0)
-        {
-
-        }
-        break;
-      }
-
-      case RelPos::B_C:
-      {
-
-        break;
-      }
-
-      case RelPos::D_C:
-      {
-
-        break;
-      }
-
-      case RelPos::E_C:
-      {
-
-        break;
-      }
+      leftWheelSpeed = CAR_RFID_REVERSE_SPEED;
+      rightWheelSpeed = CAR_RFID_REVERSE_SPEED + m_ReturnCorrection;
     }
-  }
-
-  switch (relPos)
-  {
-    case RelPos::A_C:
+    else
     {
-      leftWheelSpeed = 50;
-      rightWheelSpeed = 40;
-      break;
+      leftWheelSpeed = CAR_RFID_REVERSE_SPEED - m_ReturnCorrection;
+      rightWheelSpeed = CAR_RFID_REVERSE_SPEED;
     }
-
-    case RelPos::B_C:
-    {
-      leftWheelSpeed = 50;
-      rightWheelSpeed = 45;
-      break;
-    }
-
-    case RelPos::D_C:
-    {
-      leftWheelSpeed = 45;
-      rightWheelSpeed = 50;
-      break;
-    }
-
-    case RelPos::E_C:
-    {
-      leftWheelSpeed = 40;
-      rightWheelSpeed = 50;
-      break;
-    }
-
-    case RelPos::Perfect:
-    {
-      leftWheelSpeed = 50;
-      rightWheelSpeed = 50;
-      break;
-    }
-
-    case RelPos::C_BL:
-    {
-      leftWheelSpeed = 55;
-      rightWheelSpeed = 35;
-      break;
-    }
-
-    case RelPos::C_BR:
-    {
-      leftWheelSpeed = 35;
-      rightWheelSpeed = 55;
-      break;
-    }
-
-    case RelPos::FL_BL:
-    {
-      leftWheelSpeed = 0;
-      rightWheelSpeed = 0;
-      break;
-    }
-
-    case RelPos::FR_BR:
-    {
-      leftWheelSpeed = 0;
-      rightWheelSpeed = 0;
-      break;
-    }
-
-    case RelPos::FL_A:
-    {
-      leftWheelSpeed = 0;
-      rightWheelSpeed = 0;
-      break;
-    }
-
-    case RelPos::FL_B:
-    {
-      leftWheelSpeed = 0;
-      rightWheelSpeed = 0;
-      break;
-    }
-
-    case RelPos::FL_D:
-    {
-      leftWheelSpeed = 0;
-      rightWheelSpeed = 0;
-      break;
-    }
-
-    case RelPos::FL_E:
-    {
-      leftWheelSpeed = 0;
-      rightWheelSpeed = 0;
-      break;
-    }
-
-    case RelPos::FR_A:
-    {
-      leftWheelSpeed = 0;
-      rightWheelSpeed = 0;
-      break;
-    }
-
-    case RelPos::FR_B:
-    {
-      leftWheelSpeed = 0;
-      rightWheelSpeed = 0;
-      break;
-    }
-
-    case RelPos::FR_D:
-    {
-      leftWheelSpeed = 0;
-      rightWheelSpeed = 0;
-      break;
-    }
-
-    case RelPos::FR_E:
-    {
-      leftWheelSpeed = 0;
-      rightWheelSpeed = 0;
-      break;
-    }
-  }
-
-  CarMotor::SetSpeed(-rightWheelSpeed, -leftWheelSpeed);
+    Serial.println("-----");
+    Serial.println(leftWheelSpeed);
+    Serial.println(rightWheelSpeed);
+    CarMotor::SetSpeed(leftWheelSpeed, rightWheelSpeed);
 }

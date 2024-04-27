@@ -26,10 +26,10 @@ public:
 
   void Reset();
   void OnUpdate(float dt);
-  void GetSpeed(float& leftWheelSpeed, float& rightWheelSpeed);
+  void GetSpeed(int maxSpeed, float& leftWheelSpeed, float& rightWheelSpeed);
 
 private:
-  float m_ErrorDataPoints[20];
+  float m_PreviousError[2];
   float m_Timer;
 };
 

@@ -17,7 +17,7 @@ void RFID::Initialize()
 
 bool RFID::HasValue()
 {
-    return mfrc522->PICC_IsNewCardPresent() && mfrc522->PICC_ReadCardSerial();
+  return mfrc522->PICC_IsNewCardPresent() && mfrc522->PICC_ReadCardSerial();
 }
 
 uint32_t RFID::ReadValue()
