@@ -112,21 +112,32 @@ PIDController::PIDController()
 void PIDController::Reset()
 {
   m_Timer = 0.0f;
-  for (int i = 0; i < 20; i++)
+  for (int i = 0; i < 7; i++)
     m_ErrorDataPoints[i] = 0.0f;
 }
 
 void PIDController::OnUpdate(float dt)
 {
   m_Timer += dt;
-  while (m_Timer >= 0.01f)
+  while (m_Timer >= D_UPDATE_RATE)
   {
-    for (int i = 0; i < 19; i++)
-      m_ErrorDataPoints[i + 1] = m_ErrorDataPoints[i];
+    for (int i = 0; i < 20; i++)
+    //   m_ErrorDataPoints[i + 1] = m_ErrorDataPoints[i];
+      m_ErrorDataPoints[20 - i] = m_ErrorDataPoints[19 - i];
 
     m_ErrorDataPoints[0] = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT);
-    m_Timer -= 0.01f;
+    m_Timer -= D_UPDATE_RATE;
   }
+  //Debug
+  // Serial.print(m_ErrorDataPoints[0]); Serial.print(" ");
+  // Serial.print(m_ErrorDataPoints[1]); Serial.print(" ");
+  // Serial.print(m_ErrorDataPoints[2]); Serial.print(" ");
+  // Serial.print(m_ErrorDataPoints[3]); Serial.print(" ");
+  // Serial.print(m_ErrorDataPoints[4]); Serial.print(" ");
+  // Serial.print(m_ErrorDataPoints[5]); Serial.print(" ");
+  // Serial.print(m_ErrorDataPoints[6]); Serial.print(" ");
+
+
 }
 
 void PIDController::GetSpeed(float& leftWheelSpeed, float& rightWheelSpeed)
@@ -134,14 +145,12 @@ void PIDController::GetSpeed(float& leftWheelSpeed, float& rightWheelSpeed)
   float currentError = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT);
   float derivativeSum = 0.0f;
 
-  float t = 0.0f;
   for (int i = 0; i < 20; i++)
   {
-    t += 0.01f;
-    derivativeSum += (currentError - m_ErrorDataPoints[i]) / t;
+    derivativeSum += (currentError - m_ErrorDataPoints[i]);
   }
 
-  derivativeSum /= 20.0f;
+  derivativeSum /= (20.0f * 10.0f * D_UPDATE_RATE);
   //Serial.println(derivativeSum); // Debug
 
   float offset = CAR_SPEED * (InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT) * CAR_PATH_TRACE_ADJUST_P + derivativeSum * CAR_PATH_TRACE_ADJUST_D);
@@ -163,27 +172,28 @@ void PIDController::GetBackSpeed(float& leftWheelSpeed, float& rightWheelSpeed)
   float currentError = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT);
   float derivativeSum = 0.0f;
 
-  float t = 0.0f;
   for (int i = 0; i < 20; i++)
   {
-    t += 0.01f;
-    derivativeSum += (currentError - m_ErrorDataPoints[i]) / t;
+    derivativeSum += (currentError - m_ErrorDataPoints[i]);
   }
+  derivativeSum /= (20.0f * 10.0f * D_UPDATE_RATE);
 
-  derivativeSum /= 20.0f;
-  //Serial.println(derivativeSum); // Debug
+  // Serial.print(currentError); // Debug
+  // Serial.print(" ");
+  Serial.println(derivativeSum * D_UPDATE_RATE); // Debug
 
-  float offset = derivativeSum * CAR_PATH_TRACE_ADJUST_D * 0.85;
-  
+  float offset = derivativeSum * CAR_BACK_TRACE_ADJUST_D;
+
+
   if (offset > 0)
   {
     leftWheelSpeed = - CAR_SPEED;
-    rightWheelSpeed = CAR_SPEED + offset;
+    rightWheelSpeed = - CAR_SPEED - offset;
   }
   else
   {
     rightWheelSpeed = - CAR_SPEED;
-    leftWheelSpeed = CAR_SPEED - offset;
+    leftWheelSpeed = - CAR_SPEED + offset;
   }
 }
 
