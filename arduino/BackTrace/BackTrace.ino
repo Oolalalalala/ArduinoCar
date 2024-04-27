@@ -1,46 +1,41 @@
 #include "BasicControl.h"
-#include "Config.h"
 
-#define CAR_RFID_REVERSE_SPEED -150
+#define IFA InferredSensorArray
 
-float m_ReturnCorrection = 0.0f;
 Timer timer;
-void setup() 
-{
-  Serial.begin(9600);
-  InferredSensorArray::Initialize();
-  timer.Tick();
-}
+PIDController m_controller;
 
-int c = 0;
+void setup(){
+    IFA::Initialize();
+    Serial.begin(9600);
+}
 
 void loop()
 {
-    InferredSensorArray::CollectState();
-    float dt = timer.Tick();
+  IFA::CollectState();
+  float leftWheelSpeed, rightWheelSpeed;
+  float m_DelayTimer;
+  bool m_OnNode, m_ExitNode;
 
-    if (InferredSensorArray::GetState(0) || InferredSensorArray::GetState(1))
-      m_ReturnCorrection = -CAR_RFID_REVERSE_SPEED * -0.3f;
-    if (InferredSensorArray::GetState(3) || InferredSensorArray::GetState(4))
-      m_ReturnCorrection = -CAR_RFID_REVERSE_SPEED * 0.3f;
-    if (c == 0 && InferredSensorArray::GetState(2))
-      m_ReturnCorrection = 0;
+  float dt = timer.Tick();
+  m_controller.OnUpdate(dt);
+  m_controller.GetBackSpeed(leftWheelSpeed, rightWheelSpeed);
+  // CarMotor::SetSpeed(leftWheelSpeed, rightWheelSpeed);
 
-    m_ReturnCorrection *= pow(0.2, dt);
-
-    float leftWheelSpeed, rightWheelSpeed;
-    if (m_ReturnCorrection > 0)
-    {
-      leftWheelSpeed = CAR_RFID_REVERSE_SPEED;
-      rightWheelSpeed = CAR_RFID_REVERSE_SPEED + m_ReturnCorrection;
-    }
-    else
-    {
-      leftWheelSpeed = CAR_RFID_REVERSE_SPEED - m_ReturnCorrection;
-      rightWheelSpeed = CAR_RFID_REVERSE_SPEED;
-    }
-    Serial.println("-----");
-    Serial.println(leftWheelSpeed);
-    Serial.println(rightWheelSpeed);
-    CarMotor::SetSpeed(leftWheelSpeed, rightWheelSpeed);
+  // Enters the node
+//   if (InferredSensorArray::GetDetectionCount() == 5)
+//   {
+//     m_OnNode = true;
+//   }
+//   if (m_OnNode)
+//   {
+//     m_DelayTimer += dt;
+//     CarMotor::SetSpeed(0, 0);
+//     while (true){
+//       CarMotor::SetSpeed(50, -50);
+//       delay(250);
+//       CarMotor::SetSpeed(-50, 50);
+//       delay(250);
+//     }
+//   }
 }

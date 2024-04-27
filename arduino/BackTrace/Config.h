@@ -28,6 +28,7 @@
 // Path tracing parameters
 #define CAR_PATH_TRACE_ADJUST_P 0.5f
 #define CAR_PATH_TRACE_ADJUST_D 0.1f
+#define CAR_BACK_TRACE_ADJUST_D 0.85f
 #define CAR_PATH_TRACE_INFERRED_WEIGHT -4.0f, -1.0f, 0.0f, 1.0f, 4.0f
 
 //
@@ -40,5 +41,8 @@
 #define CAR_SPRINT_STATE_BRAKE_TIME 0.02f
 #define CAR_SPRINT_STATE_BRAKE_SPEED 255
 #define CAR_TURN_BRAKE_TIME 0.00f
+
+// PID Related
+#define D_UPDATE_RATE 0.01f
 
 #endif
