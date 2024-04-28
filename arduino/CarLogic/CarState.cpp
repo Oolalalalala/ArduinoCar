@@ -384,7 +384,7 @@ void TurnLeftState::OnStateUpdate(float dt)
   // Special case: Two blobs -> One blob
   if (InferredSensorArray::GetDetectionBlobCount() == 2)
     m_TwoBlobs = true;
-  if (m_TwoBlobs && InferredSensorArray::GetDetectionBlobCount() == 1 && InferredSensorArray::GetState(0))
+  if (m_TwoBlobs && InferredSensorArray::GetDetectionBlobCount() == 1 && InferredSensorArray::GetState(3) == 0 && InferredSensorArray::GetState(4) == 0)
     m_Exit = true;
 
   if (InferredSensorArray::GetDetectionCount() <= 3 && InferredSensorArray::GetState(0) && InferredSensorArray::GetDetectionBlobCount() == 1 && m_ImmunityTimer >= CAR_TURN_STATE_IMMUNITY_TIME)
@@ -430,7 +430,7 @@ void TurnRightState::OnStateUpdate(float dt)
   
   if (InferredSensorArray::GetDetectionBlobCount() == 2)
     m_TwoBlobs = true;
-  if (m_TwoBlobs && InferredSensorArray::GetDetectionBlobCount() == 1 && InferredSensorArray::GetState(4))
+  if (m_TwoBlobs && InferredSensorArray::GetDetectionBlobCount() == 1 && InferredSensorArray::GetState(0) == 0 && InferredSensorArray::GetState(1) == 0)
     m_Exit = true;
 
   if (InferredSensorArray::GetDetectionCount() <= 3 && InferredSensorArray::GetState(4) && InferredSensorArray::GetDetectionBlobCount() == 1 && m_ImmunityTimer >= CAR_TURN_STATE_IMMUNITY_TIME)
