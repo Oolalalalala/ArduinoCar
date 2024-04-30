@@ -37,6 +37,8 @@ public:
 private:
   PIDController m_Controller;
 
+  bool m_LeftNode;
+  float m_Timer;
   float m_DelayTimer;
   bool m_OnNode;
   bool m_ExitNode;

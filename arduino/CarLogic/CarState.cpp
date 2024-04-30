@@ -25,7 +25,9 @@ static void CalculatePathTraceSpeed(int maxSpeed, float& leftWheelSpeed, float& 
 
 void ForwardState::OnStateEnter()
 {
+  m_Timer = 0.0f;
   m_DelayTimer = 0.0f;
+  m_LeftNode = false;
   m_OnNode = false;
   m_ExitNode = false;
   Serial.println("Forward state begin");
@@ -33,13 +35,39 @@ void ForwardState::OnStateEnter()
 
 void ForwardState::OnStateUpdate(float dt)
 {
-  float leftWheelSpeed, rightWheelSpeed;
-  m_Controller.OnUpdate(dt);
-  m_Controller.GetSpeed(CAR_SPEED, leftWheelSpeed, rightWheelSpeed);
-  CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
+  m_Timer += dt;
+  bool trace = true;
+  // Derailed
+  if (InferredSensorArray::GetDetectionCount() == 0 && m_Timer < CAR_SPRINT_STATE_DERAIL_CORRECTION_TIME)
+  {
+    CarCommand previousCommand = m_StateMachine->GetPreviousCommand();
+    if (previousCommand == CarCommand::TurnLeft)
+    {
+      CarMotor::SetSpeed(CAR_SPRINT_STATE_CORRECTION_LEFT);
+      trace = false;
+    }
+    else if (previousCommand == CarCommand::TurnRight)
+    {
+      CarMotor::SetSpeed(CAR_SPRINT_STATE_CORRECTION_RIGHT);
+      trace = false;
+    }
+  }
+  if (trace)
+  {
+    float leftWheelSpeed, rightWheelSpeed;
+    m_Controller.OnUpdate(dt);
+    m_Controller.GetSpeed(CAR_SPEED, leftWheelSpeed, rightWheelSpeed);
+    if (m_OnNode)
+      CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO * 0.5f, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO * 0.5f);
+    else
+      CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
+  }
+
+  if (InferredSensorArray::GetDetectionCount() <= 3)
+    m_LeftNode = true;
 
   // Enters the node
-  if (InferredSensorArray::GetDetectionCount() == 5)
+  if (m_LeftNode && InferredSensorArray::GetDetectionCount() == 5)
   {
     m_OnNode = true;
   }
@@ -110,15 +138,35 @@ void TestRFIDState::OnStateUpdate(float dt)
   // Main sequence
   if (m_LeftNode)
     m_SlowDownTimer += dt;
-    
-  int maxSpeed;
-  if (m_SlowDownTimer < CAR_RFID_SLOW_DOWN_DELAY || !m_LeftNode)
-    maxSpeed = CAR_SPEED;
-  else
-    maxSpeed = CAR_RFID_SLOW_DOWN_SPEED;
-  float leftWheelSpeed, rightWheelSpeed;
-  CalculatePathTraceSpeed(maxSpeed, leftWheelSpeed, rightWheelSpeed);
-  CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
+  
+
+  bool trace = true;
+  // Derailed
+  if (InferredSensorArray::GetDetectionCount() == 0 && m_SlowDownTimer < CAR_SPRINT_STATE_DERAIL_CORRECTION_TIME)
+  {
+    CarCommand previousCommand = m_StateMachine->GetPreviousCommand();
+    if (previousCommand == CarCommand::TurnLeft)
+    {
+      CarMotor::SetSpeed(CAR_SPRINT_STATE_CORRECTION_LEFT);
+      trace = false;
+    }
+    else if (previousCommand == CarCommand::TurnRight)
+    {
+      CarMotor::SetSpeed(CAR_SPRINT_STATE_CORRECTION_RIGHT);
+      trace = false;
+    }
+  }
+  if (trace)
+  {
+    int maxSpeed;
+    if (m_SlowDownTimer < CAR_RFID_SLOW_DOWN_DELAY || !m_LeftNode)
+      maxSpeed = CAR_SPEED;
+    else
+      maxSpeed = CAR_RFID_SLOW_DOWN_SPEED;
+    float leftWheelSpeed, rightWheelSpeed;
+    CalculatePathTraceSpeed(maxSpeed, leftWheelSpeed, rightWheelSpeed);
+    CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
+  }
 
   if (InferredSensorArray::GetDetectionCount() <= 3)
     m_LeftNode = true;
