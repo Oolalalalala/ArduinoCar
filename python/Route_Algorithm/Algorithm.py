@@ -102,7 +102,7 @@ def get_best_route():
 def get_best_ETA_total():
     if not calculated:
         calcultate()
-    return best_ETA_total - 0.55
+    return best_ETA_total
 
 def get_best_score():
     return sum([point.score for point in maze.score_points])
