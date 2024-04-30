@@ -101,12 +101,12 @@ class Map():
     
     def path_to_operation_basic(self, path: deque, starting: bool = False, direction: int = None) -> tuple:
         
-        f_time = 0.75
+        f_time = 0.7
         s_time = 0.55
-        l_time = 0.35
-        l2_time = 0.60
-        r_time = 0.35
-        i_time = 1 + 0.05
+        l_time = 0.4
+        l2_time = 0.6
+        r_time = 0.4
+        i_time = 1.5
         
         if len(path) == 1:
             return ('', 0)
