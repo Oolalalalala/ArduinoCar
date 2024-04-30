@@ -1,6 +1,6 @@
 #ifndef BASIC_CONTROL_H
 #define BASIC_CONTROL_H
-
+#include "Config.h"
 
 class InferredSensorArray
 {
@@ -26,11 +26,13 @@ public:
 
   void Reset();
   void OnUpdate(float dt);
+  void OnBackUpdate(float dt);
   void GetSpeed(float& leftWheelSpeed, float& rightWheelSpeed);
   void GetBackSpeed(float& leftWheelSpeed, float& rightWheelSpeed);
 
 private:
-  float m_ErrorDataPoints[20];
+  float m_ErrorDataPoints[D_DATA_AMOUNT];
+  float m_BackErrorDataPoints[D_DATA_AMOUNT];
   float m_Timer;
 };
 

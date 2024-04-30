@@ -28,7 +28,7 @@
 // Path tracing parameters
 #define CAR_PATH_TRACE_ADJUST_P 0.5f
 #define CAR_PATH_TRACE_ADJUST_D 0.1f
-#define CAR_BACK_TRACE_ADJUST_D 0.85f
+#define CAR_BACK_TRACE_ADJUST_D 0.001f
 #define CAR_PATH_TRACE_INFERRED_WEIGHT -4.0f, -1.0f, 0.0f, 1.0f, 4.0f
 
 //
@@ -44,5 +44,6 @@
 
 // PID Related
 #define D_UPDATE_RATE 0.01f
+#define D_DATA_AMOUNT 5
 
 #endif

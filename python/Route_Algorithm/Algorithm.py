@@ -120,7 +120,7 @@ def get_limit_route():
 def get_limited_ETA_total():
     if not limited_calculated:
         calculate_limited()
-    return best_limited_route[1] - 0.55
+    return best_limited_route[1]
 
 def get_limited_score():
     if not limited_calculated:
