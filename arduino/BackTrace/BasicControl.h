@@ -31,9 +31,8 @@ public:
   void GetBackSpeed(float& leftWheelSpeed, float& rightWheelSpeed);
 
 private:
-  float m_ErrorDataPoints[D_DATA_AMOUNT];
-  float m_BackErrorDataPoints[D_DATA_AMOUNT];
-  float m_Timer;
+  float m_SimulatedCarDisplacement;
+  float m_EffectiveBackError;
 };
 
 class CarMotor
