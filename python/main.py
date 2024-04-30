@@ -41,13 +41,13 @@ def main():
         if m_buffer[0] != ord('<') or m_buffer[end_pos] != ord('>'):
             print("Invalid message")
             m_buffer = m_buffer[end_pos+1:] # Discard the message
-            continue;
+            continue
         
         print(m_buffer[:end_pos+1])
         
         # Send next command
         if m_buffer[1] == 1:
-            dir = operations.popleft()
+            dir = operations.popleft() if operations else None
             outdir = "l" if dir == "u" else dir
             print(outdir)
             bti1.bt.serial_write_bytes(outdir.encode("utf-8"))
@@ -64,7 +64,7 @@ def main():
         # RFID detection failed
         elif m_buffer[1] == 3:
             if dir=='r':
-                fixdir='L'
+                fixdir='l'
                 print(fixdir)
                 bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
             elif dir=='u' or (dir=='l' and operations[0]=='l'):
@@ -72,12 +72,12 @@ def main():
                 print(fixdir)
                 bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
             elif dir=='l':
-                fixdir='R'
+                fixdir='r'
                 print(fixdir)
                 bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
 
         # Remove message from buffer
-        m_Buffer = m_Buffer[end_pos+1:]
+        m_buffer = m_buffer[end_pos+1:]
 
 if __name__ == "__main__":
     main()
