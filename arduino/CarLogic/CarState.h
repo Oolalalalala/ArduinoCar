@@ -50,25 +50,30 @@ public:
   virtual void OnStateExit() override;
 
   void ReturnSequence(float dt);
-  void AbortSequence(float dt);
+  void RetestSequence(float dt);
 
 private:
-  PIDController m_Controller;
-
+  float m_SlowDownTimer;
+  bool m_LeftNode;
   bool m_ReturnedNode;
   bool m_RFIDDetected;
   float m_ExitDelayTimer;
   bool m_ExitNode;
+  int m_Correction;
 
-  bool m_Aborted;
-  int m_AbortStage;
+  bool m_Retested;
+  int m_RetestStage;
+  float m_ReturnCorrection;
 
-  // Variable for abort
-  bool m_AbortLeftNode;
-  bool m_AbortOnNode;
-  float m_AbortEnterNodeImmunityTimer;
-  bool m_AbortExitNode;
-  float m_AbortExitDelayTimer;
+  // Variable for Retest
+  bool m_RetestLeftNode;
+  bool m_RetestOnNode;
+  float m_RetestBrakeTimer;
+  float m_RetestRotateBrakeTimer;
+  bool m_RetestExitRotate;
+  bool m_RetestExitNode;
+  float m_RetestForwardTimer;
+  float m_RetestRotateTimer;
 };
 
 class RotateLeftState : public CarState
@@ -79,7 +84,10 @@ public:
   virtual void OnStateExit() override;
 
 private:
+  float m_BrakeTimer;
+  bool m_ExitState;
   bool leftRoute;
+  float m_Timer;
 };
 
 
@@ -91,7 +99,10 @@ public:
   virtual void OnStateExit() override;
 
 private:
+  float m_BrakeTimer;
+  bool m_ExitState;
   bool leftRoute;
+  float m_Timer;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -95,7 +95,7 @@ float leftWheelSpeed = 100.0, rightWheelSpeed = 100.0;
 bool x = false;
 void loop() 
 {
-  MoveWheel(-220,-255);
+  MoveWheel(-230,-255);
   return;
 
 

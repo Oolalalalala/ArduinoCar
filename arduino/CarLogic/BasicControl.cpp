@@ -59,6 +59,8 @@ void InferredSensorArray::DebugOutput()
   Serial.print(s_SensorStates[3]);
   Serial.print(s_SensorStates[4]);
   Serial.print('\n');
+
+  
 }
 
 
@@ -112,8 +114,8 @@ PIDController::PIDController()
 void PIDController::Reset()
 {
   m_Timer = 0.0f;
-  for (int i = 0; i < 20; i++)
-    m_ErrorDataPoints[i] = 0.0f;
+  m_PreviousError[0] = 0.0f;
+  m_PreviousError[1] = 0.0f;
 }
 
 void PIDController::OnUpdate(float dt)
@@ -121,40 +123,30 @@ void PIDController::OnUpdate(float dt)
   m_Timer += dt;
   while (m_Timer >= 0.01f)
   {
-    for (int i = 0; i < 19; i++)
-      m_ErrorDataPoints[i + 1] = m_ErrorDataPoints[i];
-
-    m_ErrorDataPoints[0] = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT);
+    m_PreviousError[1] = m_PreviousError[0];
+    m_PreviousError[0] = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_PID_WEIGHT);
     m_Timer -= 0.01f;
   }
 }
 
-void PIDController::GetSpeed(float& leftWheelSpeed, float& rightWheelSpeed)
+void PIDController::GetSpeed(int maxSpeed, float& leftWheelSpeed, float& rightWheelSpeed)
 {
-  float currentError = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT);
+  float currentError = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_PID_WEIGHT);
   float derivativeSum = 0.0f;
 
-  float t = 0.0f;
-  for (int i = 0; i < 20; i++)
-  {
-    t += 0.01f;
-    derivativeSum += (currentError - m_ErrorDataPoints[i]) / t;
-  }
+  float derivative = (currentError - m_PreviousError[0]) / 0.01f + (currentError - m_PreviousError[1]) / 0.01f * 2.1f;
+  float offset = maxSpeed * (currentError * CAR_PATH_TRACE_PID_P + derivative * CAR_PATH_TRACE_PID_D);
 
-  derivativeSum /= 20.0f;
-  //Serial.println(derivativeSum); // Debug
-
-  float offset = CAR_SPEED * (InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT) * CAR_PATH_TRACE_ADJUST_P + derivativeSum * CAR_PATH_TRACE_ADJUST_D);
   
   if (offset > 0)
   {
-    leftWheelSpeed = CAR_SPEED;
-    rightWheelSpeed = CAR_SPEED - offset;
+    leftWheelSpeed = maxSpeed;
+    rightWheelSpeed = maxSpeed - offset;
   }
   else
   {
-    rightWheelSpeed = CAR_SPEED;
-    leftWheelSpeed = CAR_SPEED + offset;
+    rightWheelSpeed = maxSpeed;
+    leftWheelSpeed = maxSpeed + offset;
   }
 }
 

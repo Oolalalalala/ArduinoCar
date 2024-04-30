@@ -25,15 +25,6 @@ void loop()
 {
   InferredSensorArray::CollectState();
 
-    //InferredSensorArray::DebugOutput();
-  static int x = 0;
-  if (x % 3 == 0)
-  {
-    x-= 2;
-  }
-  else
-    x++;
-
   float dt = timer.Tick();
   stateMachine->OnUpdate(dt);
 }
