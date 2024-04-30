@@ -111,89 +111,41 @@ PIDController::PIDController()
 
 void PIDController::Reset()
 {
-  m_Timer = 0.0f;
-  for (int i = 0; i < 7; i++)
-    m_ErrorDataPoints[i] = 0.0f;
+  m_SimulatedCarDisplacement = - InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT);
 }
 
-void PIDController::OnUpdate(float dt)
+void PIDController::OnBackUpdate(float dt)
 {
-  m_Timer += dt;
-  while (m_Timer >= D_UPDATE_RATE)
-  {
-    for (int i = 0; i < 20; i++)
-    //   m_ErrorDataPoints[i + 1] = m_ErrorDataPoints[i];
-      m_ErrorDataPoints[20 - i] = m_ErrorDataPoints[19 - i];
-
-    m_ErrorDataPoints[0] = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT);
-    m_Timer -= D_UPDATE_RATE;
-  }
-  //Debug
-  // Serial.print(m_ErrorDataPoints[0]); Serial.print(" ");
-  // Serial.print(m_ErrorDataPoints[1]); Serial.print(" ");
-  // Serial.print(m_ErrorDataPoints[2]); Serial.print(" ");
-  // Serial.print(m_ErrorDataPoints[3]); Serial.print(" ");
-  // Serial.print(m_ErrorDataPoints[4]); Serial.print(" ");
-  // Serial.print(m_ErrorDataPoints[5]); Serial.print(" ");
-  // Serial.print(m_ErrorDataPoints[6]); Serial.print(" ");
-
-
+  float K = CAR_BACK_TRACE_ADJUST_I * dt;
+  float currentError = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT);
+  m_SimulatedCarDisplacement = (1 + K) * m_SimulatedCarDisplacement - K * currentError;
+  m_EffectiveBackError = 2 * m_SimulatedCarDisplacement - currentError;
 }
 
 void PIDController::GetSpeed(float& leftWheelSpeed, float& rightWheelSpeed)
 {
-  float currentError = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT);
-  float derivativeSum = 0.0f;
-
-  for (int i = 0; i < 20; i++)
-  {
-    derivativeSum += (currentError - m_ErrorDataPoints[i]);
-  }
-
-  derivativeSum /= (20.0f * 10.0f * D_UPDATE_RATE);
-  //Serial.println(derivativeSum); // Debug
-
-  float offset = CAR_SPEED * (InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT) * CAR_PATH_TRACE_ADJUST_P + derivativeSum * CAR_PATH_TRACE_ADJUST_D);
-  
-  if (offset > 0)
-  {
-    leftWheelSpeed = CAR_SPEED;
-    rightWheelSpeed = CAR_SPEED - offset;
-  }
-  else
-  {
-    rightWheelSpeed = CAR_SPEED;
-    leftWheelSpeed = CAR_SPEED + offset;
-  }
+  return;
 }
 
 void PIDController::GetBackSpeed(float& leftWheelSpeed, float& rightWheelSpeed)
 {
   float currentError = InferredSensorArray::GetNormalizedErrorValue(CAR_PATH_TRACE_INFERRED_WEIGHT);
-  float derivativeSum = 0.0f;
-
-  for (int i = 0; i < 20; i++)
-  {
-    derivativeSum += (currentError - m_ErrorDataPoints[i]);
-  }
-  derivativeSum /= (20.0f * 10.0f * D_UPDATE_RATE);
 
   // Serial.print(currentError); // Debug
   // Serial.print(" ");
-  Serial.println(derivativeSum * D_UPDATE_RATE); // Debug
 
-  float offset = derivativeSum * CAR_BACK_TRACE_ADJUST_D;
+  float offset = CAR_SPEED * m_EffectiveBackError * CAR_PATH_TRACE_ADJUST_P;
 
 
   if (offset > 0)
   {
     leftWheelSpeed = - CAR_SPEED;
-    rightWheelSpeed = - CAR_SPEED - offset;
+    rightWheelSpeed = - CAR_SPEED + offset;
   }
   else
   {
     rightWheelSpeed = - CAR_SPEED;
-    leftWheelSpeed = - CAR_SPEED + offset;
+    leftWheelSpeed = - CAR_SPEED - offset;
   }
 }
 

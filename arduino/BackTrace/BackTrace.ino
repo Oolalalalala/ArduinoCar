@@ -18,24 +18,32 @@ void loop()
   bool m_OnNode, m_ExitNode;
 
   float dt = timer.Tick();
-  m_controller.OnUpdate(dt);
+  m_controller.OnBackUpdate(dt);
   m_controller.GetBackSpeed(leftWheelSpeed, rightWheelSpeed);
-  // CarMotor::SetSpeed(leftWheelSpeed, rightWheelSpeed);
 
   // Enters the node
-//   if (InferredSensorArray::GetDetectionCount() == 5)
-//   {
-//     m_OnNode = true;
-//   }
-//   if (m_OnNode)
-//   {
-//     m_DelayTimer += dt;
-//     CarMotor::SetSpeed(0, 0);
-//     while (true){
-//       CarMotor::SetSpeed(50, -50);
-//       delay(250);
-//       CarMotor::SetSpeed(-50, 50);
-//       delay(250);
-//     }
-//   }
+  if (InferredSensorArray::GetDetectionCount() == 5){
+    m_OnNode = true;
+  }else if (InferredSensorArray::GetDetectionCount() == 0){
+    m_ExitNode = false;
+  }
+  
+  if (m_ExitNode || !m_OnNode){
+    CarMotor::SetSpeed(0, 0);
+  }else{
+    CarMotor::SetSpeed(leftWheelSpeed, rightWheelSpeed);
+  }
+  
+  
+  // if (m_OnNode)
+  // {
+  //   m_DelayTimer += dt;
+  //   CarMotor::SetSpeed(0, 0);
+  //   while (true){
+  //     CarMotor::SetSpeed(50, -50);
+  //     delay(250);
+  //     CarMotor::SetSpeed(-50, 50);
+  //     delay(250);
+  //   }
+  // }
 }
