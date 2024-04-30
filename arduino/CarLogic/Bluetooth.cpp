@@ -42,9 +42,9 @@ CarCommand Bluetooth::ReadStateMessage()
     case 'l': return CarCommand::RotateLeft;
     case 'r': return CarCommand::RotateRight;
     case 'i': return CarCommand::TestRFID;
-    case 's': return CarCommand::SprintState;
-    case 'L': return CarCommand::TurnLeftState;
-    case 'R': return CarCommand::TurnRightState;
+    case 's': return CarCommand::Sprint;
+    case 'L': return CarCommand::TurnLeft;
+    case 'R': return CarCommand::TurnRight;
   }
 
   Serial.println("Error: Unknown CarCommand from bluetooth");

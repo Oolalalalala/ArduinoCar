@@ -5,7 +5,7 @@
 
 enum class CarCommand : unsigned char
 {
-    None = 0, Forward = 1, RotateLeft = 2, RotateRight = 3, TestRFID = 4, SprintState = 5, TurnLeftState = 6, TurnRightState = 7
+    None = 0, Forward = 1, RotateLeft = 2, RotateRight = 3, TestRFID = 4, Sprint = 5, TurnLeft = 6, TurnRight = 7
 };
 
 // Forward declaration

@@ -344,10 +344,29 @@ void SprintState::OnStateUpdate(float dt)
 {
   m_ImmunityTimer += dt;
   
-  float leftWheelSpeed, rightWheelSpeed;
-  m_Controller.OnUpdate(dt);
-  m_Controller.GetSpeed(CAR_SPEED, leftWheelSpeed, rightWheelSpeed);
-  CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
+  bool trace = true;
+  // Derailed
+  if (InferredSensorArray::GetDetectionCount() == 0 && m_ImmunityTimer < CAR_SPRINT_STATE_DERAIL_CORRECTION_TIME)
+  {
+    CarCommand previousCommand = m_StateMachine->GetPreviousCommand();
+    if (previousCommand == CarCommand::TurnLeft)
+    {
+      CarMotor::SetSpeed(CAR_SPRINT_STATE_CORRECTION_LEFT);
+      trace = false;
+    }
+    else if (previousCommand == CarCommand::TurnRight)
+    {
+      CarMotor::SetSpeed(CAR_SPRINT_STATE_CORRECTION_RIGHT);
+      trace = false;
+    }
+  }
+  if (trace)
+  {
+    float leftWheelSpeed, rightWheelSpeed;
+    m_Controller.OnUpdate(dt);
+    m_Controller.GetSpeed(CAR_SPEED, leftWheelSpeed, rightWheelSpeed);
+    CarMotor::SetSpeed(leftWheelSpeed * CAR_LEFT_WHEEL_SPEED_RATIO, rightWheelSpeed * CAR_RIGHT_WHEEL_SPEED_RATIO);
+  }
 
   if (InferredSensorArray::GetDetectionCount() <= 3)
     m_LeftNode = true;
@@ -384,7 +403,7 @@ void TurnLeftState::OnStateUpdate(float dt)
   // Special case: Two blobs -> One blob
   if (InferredSensorArray::GetDetectionBlobCount() == 2)
     m_TwoBlobs = true;
-  if (m_TwoBlobs && InferredSensorArray::GetDetectionBlobCount() == 1 && InferredSensorArray::GetState(3) == 0 && InferredSensorArray::GetState(4) == 0)
+  if (m_TwoBlobs && InferredSensorArray::GetDetectionBlobCount() == 1)
     m_Exit = true;
 
   if (InferredSensorArray::GetDetectionCount() <= 3 && InferredSensorArray::GetState(0) && InferredSensorArray::GetDetectionBlobCount() == 1 && m_ImmunityTimer >= CAR_TURN_STATE_IMMUNITY_TIME)
@@ -393,7 +412,7 @@ void TurnLeftState::OnStateUpdate(float dt)
   if (m_Exit)
   {
     m_BrakeTimer += dt;
-    CarMotor::SetSpeed(CAR_TURN_RIGHT_SPEED);
+    CarMotor::SetSpeed(255, -255);
 
     if (m_BrakeTimer >= CAR_TURN_BRAKE_TIME)
       m_StateMachine->NextState();
@@ -426,12 +445,12 @@ void TurnRightState::OnStateUpdate(float dt)
     CarMotor::SetSpeed(CAR_SPRINT_STATE_BRAKE_SPEED, CAR_SPRINT_STATE_BRAKE_SPEED);
     return;
   }
-
   
   if (InferredSensorArray::GetDetectionBlobCount() == 2)
     m_TwoBlobs = true;
-  if (m_TwoBlobs && InferredSensorArray::GetDetectionBlobCount() == 1 && InferredSensorArray::GetState(0) == 0 && InferredSensorArray::GetState(1) == 0)
+  if (m_TwoBlobs && InferredSensorArray::GetDetectionBlobCount() == 1)
     m_Exit = true;
+  
 
   if (InferredSensorArray::GetDetectionCount() <= 3 && InferredSensorArray::GetState(4) && InferredSensorArray::GetDetectionBlobCount() == 1 && m_ImmunityTimer >= CAR_TURN_STATE_IMMUNITY_TIME)
     m_Exit = true;
@@ -439,7 +458,7 @@ void TurnRightState::OnStateUpdate(float dt)
   if (m_Exit)
   {
     m_BrakeTimer += dt;
-    CarMotor::SetSpeed(CAR_TURN_LEFT_SPEED);
+    CarMotor::SetSpeed(-255, 255);
 
     if (m_BrakeTimer >= CAR_TURN_BRAKE_TIME)
       m_StateMachine->NextState();

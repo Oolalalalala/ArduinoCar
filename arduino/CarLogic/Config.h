@@ -22,13 +22,13 @@
 #define CAR_RFID_SLOW_DOWN_DELAY 0.2f
 #define CAR_RFID_SLOW_DOWN_SPEED 120
 #define CAR_RFID_REVERSE_SPEED -100
-#define CAR_RFID_RETEST_BRAKE_TIME 0.1f
+#define CAR_RFID_RETEST_BRAKE_TIME 0.05f
 #define CAR_RFID_RETEST_BRAKE_SPEED -255
 #define CAR_RFID_RETEST_ROTATE_SPEED -135, 135
 #define CAR_RFID_RETEST_ROTATE_BRAKE_TIME 0.1f
 #define CAR_RFID_RETEST_ROTATE_IMMUNITY_TIME 0.2f
 #define CAR_RFID_RETEST_SPEED 100
-#define CAR_RFID_RETEST_GIVE_UP_TIME 0.45f  // The amount of time to give up re-test RFID after rotate ends  
+#define CAR_RFID_RETEST_GIVE_UP_TIME 0.4f  // The amount of time to give up re-test RFID after rotate ends  
 
 // In order to prevent detection of the corner of a node, a minimum time required to exit a rotation state is added
 #define CAR_ROATATION_EXIT_STATE_IMMUNITY_TIME 0.3f
@@ -47,15 +47,19 @@
 #define CAR_PATH_TRACE_ADJUST_WEIGHT -3.5f, -1.0f, 0.0f, 1.0f, 3.5f
 
 
+#define CAR_SPRINT_STATE_CORRECTION_LEFT -200, 200
+#define CAR_SPRINT_STATE_CORRECTION_RIGHT 200, -200
+
 //
 #define CAR_SPRINT_STATE_IMMUNITY_TIME 0.2f
-#define CAR_TURN_STATE_IMMUNITY_TIME 0.35//0.2f
-#define CAR_TURN_LEFT_SPEED -255, 255
-#define CAR_TURN_RIGHT_SPEED 255, -255
+#define CAR_SPRINT_STATE_DERAIL_CORRECTION_TIME 0.4f
+#define CAR_TURN_STATE_IMMUNITY_TIME 0.1
+#define CAR_TURN_LEFT_SPEED -140, 200//-255, 255
+#define CAR_TURN_RIGHT_SPEED 200, -140//255, -255
 
 // Brakes to counter the inertia
 #define CAR_SPRINT_STATE_BRAKE_TIME 0.02f
-#define CAR_SPRINT_STATE_BRAKE_SPEED -255
+#define CAR_SPRINT_STATE_BRAKE_SPEED -255//-255
 #define CAR_TURN_BRAKE_TIME 0.02f
 
 #endif

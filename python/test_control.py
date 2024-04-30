@@ -54,8 +54,8 @@ class bluetooth:
 def read():
     while True:
         if bt.waiting():
-            bytes = bt.readBytes()
-            print(bytes)
+            buffer = bt.readBytes()
+            print(buffer.decode("ascii", errors='replace'), end="")
 
 
 if __name__ == "__main__":
@@ -67,8 +67,6 @@ if __name__ == "__main__":
     readThread = threading.Thread(target=read)
     readThread.daemon = True
     readThread.start()
-
-    #bt.write('sRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsRsR')
 
     while True:
         msgWrite = input()

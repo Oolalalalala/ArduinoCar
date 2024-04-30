@@ -15,11 +15,11 @@ static CarState* CreateCarState(CarCommand command)
     return new RotateRightState();
   case CarCommand::TestRFID:
     return new TestRFIDState();
-  case CarCommand::SprintState:
+  case CarCommand::Sprint:
     return new SprintState();
-  case CarCommand::TurnLeftState:
+  case CarCommand::TurnLeft:
     return new TurnLeftState();
-  case CarCommand::TurnRightState:
+  case CarCommand::TurnRight:
     return new TurnRightState();
   }
 
@@ -50,7 +50,9 @@ void CarStateMachine::WaitForInitialCommand()
   m_State = CreateCarState(initialCommand);
   m_State->m_StateMachine = this;
   m_State->OnStateEnter();
-
+  
+  m_PreviousCommand = CarCommand::None;
+  m_CurrentCommand = initialCommand;
   m_BufferedCommand = secondCommand;
 }
 
@@ -76,6 +78,7 @@ void CarStateMachine::OnUpdate(float dt)
     delete m_State;
     m_State = nullptr;
     m_StateEnded = false;
+    m_PreviousCommand = m_CurrentCommand;
     Bluetooth::SendMessage(1, nullptr, 0); // Request a new command
   }
 
@@ -85,6 +88,12 @@ void CarStateMachine::OnUpdate(float dt)
       m_BufferedCommand = Bluetooth::ReadStateMessage();
   }
 
+  if (m_BufferedCommand != CarCommand::None && m_ShouldDiscardCommand)
+  {
+    m_BufferedCommand = CarCommand::None;
+    m_ShouldDiscardCommand = false;
+  }
+
   if (!m_State && m_BufferedCommand != CarCommand::None)
   {
     // New state from command
@@ -92,17 +101,17 @@ void CarStateMachine::OnUpdate(float dt)
     m_State->OnStateEnter();
     m_State->m_StateMachine = this;
 
+    m_CurrentCommand = m_BufferedCommand;
     m_BufferedCommand = CarCommand::None;
   }
 }
 
 void CarStateMachine::DiscardNextCommand()
 {
-  while (m_BufferedCommand == CarCommand::None)
-  {
-    if (Bluetooth::AvailableStateMessageCount())
-      m_BufferedCommand = Bluetooth::ReadStateMessage();
-  }
+  m_ShouldDiscardCommand = true;
+}
 
-  m_BufferedCommand = CarCommand::None;
+CarCommand CarStateMachine::GetPreviousCommand()
+{
+  return m_PreviousCommand;
 }

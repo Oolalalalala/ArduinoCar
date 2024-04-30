@@ -16,10 +16,10 @@ def main():
     log = logging.getLogger("scoreboard")
     logging.basicConfig(level=logging.DEBUG)
 
-    scoreboard=sc.ScoreboardServer("chichonlo", host=f"http://140.112.175.18:5000")
-    time_remaining = 81
-    while time_remaining>80.5:
-        score, time_remaining = scoreboard.add_UID("00000000")
+    #scoreboard=sc.ScoreboardServer("chichonlo", host=f"http://140.112.175.18:5000")
+    #time_remaining = 81
+    #while time_remaining>80.5:
+    #    score, time_remaining = scoreboard.add_UID("00000000")
 
     print(preview)
     print(operations)
@@ -57,10 +57,9 @@ def main():
         elif m_buffer[1] == 2:
             uid = hex(int.from_bytes(m_buffer[3:7], byteorder="little", signed=False))
             print(uid)
-            score, time_remaining = scoreboard.add_UID(uid[2:])
-            current_score = scoreboard.get_current_score()
-            log.info(f"Current score: {current_score}")
-            print(uid)
+            #score, time_remaining = scoreboard.add_UID(uid[2:])
+            #current_score = scoreboard.get_current_score()
+            #log.info(f"Current score: {current_score}")
 
         # RFID detection failed
         elif m_buffer[1] == 3:
@@ -76,7 +75,7 @@ def main():
                 fixdir='R'
                 print(fixdir)
                 bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
-        
+
         # Remove message from buffer
         m_Buffer = m_Buffer[end_pos+1:]
 
