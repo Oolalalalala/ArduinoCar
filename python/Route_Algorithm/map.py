@@ -189,7 +189,7 @@ class Node():
                 neighbor_count += 1
         if neighbor_count == 1:
             self.score = abs(self.x - self.map.starting_point.x) + abs(self.y - self.map.starting_point.y)
-            self.score *= 10
+            self.score *= 30
         else:
             self.score = 0
         return self.score
