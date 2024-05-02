@@ -7,7 +7,7 @@ from collections import deque
 
 def main():
     
-    bti1 = bti.BTInterface()
+    bti1 = bti.BTInterface("COM5")
     bti1.start()
     
     operations = ag.get_total_operations()
@@ -25,7 +25,7 @@ def main():
     log = logging.getLogger("scoreboard")
     logging.basicConfig(level=logging.DEBUG)
 
-    scoreboard=sc.ScoreboardServer("A_LA_HUA_GUA_Thursday_T7", host=f"http://140.112.175.18:5000")
+    scoreboard=sc.ScoreboardServer("GOD_BLESS_CAR_Thursday_G7", host=f"http://140.112.175.18:5000")
     time_remaining = 81
     while time_remaining>80:
        score, time_remaining = scoreboard.add_UID("00000000")
@@ -82,22 +82,22 @@ def main():
         # RFID detection failed
         elif m_buffer[1] == 3:
             if dir=='r':
-                fixdir='l'
+                fixdir='L'
                 print(fixdir)
                 bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
             elif dir=='u' or (dir=='l' and operations[0]=='l'):
-                fixdir = operations.popleft() if operations else 's'
+                fixdir = 's'
                 print(fixdir)
                 bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
             elif dir=='l':
-                fixdir='r'
+                fixdir='R'
                 print(fixdir)
                 bti1.bt.serial_write_bytes(fixdir.encode("utf-8"))
 
         # Remove message from buffer
         m_buffer = m_buffer[end_pos+1:]
         
-    # scoreboard.socket.disconnect()
+    scoreboard.socket.disconnect()
 
 if __name__ == "__main__":
     main()
